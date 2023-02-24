@@ -190,10 +190,18 @@ public class LevelSelection extends JFrame {
 
 					if (rs2.next())
 					{
-						vector.add(rs2.getObject("Difficulty"));
+						String difficulty = rs2.getString("Difficulty"); 
+						// If difficulty is null, set it to "-"
+						if (difficulty == null)
+							difficulty = "-";
+						vector.add(difficulty);
 						String timeTaken = rs2.getString("TimeTaken"); 
 
 						System.out.println("timeTaken: " + timeTaken);
+
+						// If timeTaken is null, set it to 0
+						if (timeTaken == null)
+							timeTaken = "0";
 
 						// Convert timeTaken string into an int representing seconds
 						double secondsDouble = Double.parseDouble(timeTaken); // CAUSES ERROR FOR NEW ENTRIES
@@ -203,6 +211,9 @@ public class LevelSelection extends JFrame {
 						int minutes = secondsInt / 60;
 						int seconds = secondsInt % 60;
 						String timeTakenString = String.format("%02d:%02d", minutes, seconds);
+
+						if (secondsInt == 0)
+							timeTakenString = "-";
 						
 						vector.add(timeTakenString);
 					}
