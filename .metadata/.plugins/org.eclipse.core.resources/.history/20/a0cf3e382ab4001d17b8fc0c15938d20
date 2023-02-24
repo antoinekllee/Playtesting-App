@@ -1,0 +1,68 @@
+package playtestApp;
+
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import javax.swing.JButton;
+
+public class LevelEditor extends JFrame {
+
+	private JPanel contentPane;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					LevelEditor frame = new LevelEditor();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public LevelEditor() {
+		setResizable(false);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 100, 800, 500);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		JLabel lblTitle = new JLabel("Game - Level");
+		lblTitle.setBounds(312, 31, 149, 16);
+		contentPane.add(lblTitle);
+		
+		JButton btnEdit = new JButton("Edit");
+		btnEdit.setBounds(464, 26, 93, 29);
+		contentPane.add(btnEdit);
+		
+		JButton btnPrevLevel = new JButton("<");
+		btnPrevLevel.setBounds(200, 26, 35, 29);
+		contentPane.add(btnPrevLevel);
+		
+		JButton btnNextLevel = new JButton(">");
+		btnNextLevel.setBounds(580, 26, 35, 29);
+		contentPane.add(btnNextLevel);
+		
+		JButton btnLevels = new JButton("<-");
+		btnLevels.setBounds(31, 26, 55, 29);
+		contentPane.add(btnLevels);
+		
+		JButton btnSettings = new JButton("Settings");
+		btnSettings.setBounds(653, 26, 117, 29);
+		contentPane.add(btnSettings);
+	}
+}

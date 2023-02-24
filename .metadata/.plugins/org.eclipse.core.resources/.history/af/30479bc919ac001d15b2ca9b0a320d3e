@@ -1,0 +1,197 @@
+package playtestApp;
+
+import java.awt.EventQueue;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.Vector;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+import javax.swing.JTable;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+public class GameSelection extends JFrame {
+
+	private JPanel contentPane;
+	private JTable tblGames;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					GameSelection frame = new GameSelection();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public GameSelection() 
+	{
+		setResizable(false);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 800, 500);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		JLabel lblTitle = new JLabel("Games");
+		lblTitle.setBounds(383, 10, 42, 16);
+		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
+		contentPane.add(lblTitle);
+		
+		JLabel lblUser = new JLabel("Username");
+		lblUser.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblUser.setBounds(542, 10, 137, 16);
+		contentPane.add(lblUser);
+		
+		String username = AccountManager.GetUsername(); 
+		Boolean isAdmin = AccountManager.GetAdminStatus(); 
+		
+		lblUser.setText(username + (isAdmin ? " (Admin)" : ""));
+		
+//		DefaultTableModel tblModel = new DefaultTableModel();
+		
+//		Vector<String> columnTitles = new Vector<String> ();
+//		columnTitles.add("Subject"); 
+//		columnTitles.add("Test"); 
+//		columnTitles.add("Score"); 
+//		columnTitles.add("Level"); 
+//		columnTitles.add("Mock");
+		
+//	    String[] columns = {"Name", "Levels Reviewed", "Total Playtime"}; 
+
+//		tblModel.setColumnIdentifiers(columnTitles);
+
+//		tblGames = new JTable(tblModel);
+	    
+//	    DefaultTableModel tblModel = new DefaultTableModel() { 
+//            String[] employee = {"Name", "Levels Reviewed", "Total Playtime"}; 
+//
+//            @Override 
+//            public int getColumnCount() { 
+//                return employee.length; 
+//            } 
+//
+//            @Override 
+//            public String getColumnName(int index) { 
+//                return employee[index]; 
+//            } 
+//        }; 
+
+//        tblGames = new JTable(tblModel); 
+		
+		tblGames = new JTable() {
+			public boolean isCellEditable(int row, int column)
+			{
+				return false; 
+			}
+		};
+		tblGames.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount() == 2)
+				{
+					System.out.println("DOUBLE CLICKED");
+				}
+			}
+		});
+		tblGames.setBounds(108, 63, 632, 356);
+		contentPane.add(tblGames);
+		
+		ShowGames(); 
+	}
+	
+	private void ShowGames() 
+	{
+		Connection conn; 
+		
+		try {
+			// connect to the db
+			conn = DatabaseManager.getConnection(); 
+			
+			// create statement using sql
+			String sql = "SELECT  * FROM Games";
+			PreparedStatement statement = conn.prepareStatement(sql);
+			
+			// execute sql query and store result set
+			ResultSet rs = statement.executeQuery();
+			
+			// iterate through result set and output results to jtable
+			tblGames.setModel(DatabaseManager.buildTableModel(rs));
+//			
+//			while (rs.next())
+//			{
+//				String game = rs.getString("Name"); 
+//				System.out.println(game);
+//			}
+			
+			
+//			DefaultTableModel tblModel = (DefaultTableModel)tblGames.getModel();
+//			
+//			Vector<String> columnTitles = new Vector<String> ();
+//			columnTitles.add("Subject"); 
+//			columnTitles.add("Test"); 
+//			columnTitles.add("Score"); 
+//			columnTitles.add("Level"); 
+//			columnTitles.add("Mock");  
+//			tblModel.setColumnIdentifiers(columnTitles);
+//
+//			tblGames = new JTable(tblModel);
+			
+			
+			
+//			tblGames.setModel(columnModel);
+			
+			
+			
+			
+			
+//			ResultSetMetaData metadata = rs.getMetaData();
+		    
+		    // names of columns
+//		    Vector<String> columnNames = new Vector<String>();
+//		    int columnCount = metadata.getColumnCount();
+//		    for (int column = 1; column <= columnCount; column++) 
+//		        columnNames.add(metadata.getColumnName(column));
+//
+//		    // data of the table
+//		    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+//		    while (rs.next()) {
+//		        Vector<Object> vector = new Vector<Object>();
+//		        
+//		        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) 
+//		            vector.add(rs.getObject(columnIndex));
+//		        
+//		        data.add(vector);
+//		    }
+//
+//		    return new DefaultTableModel(data, columnNames);
+			
+			statement.close(); 
+			conn.close(); 
+		} catch (SQLException e) 
+		{ 
+			e.printStackTrace(); 
+		} 
+	}
+}
