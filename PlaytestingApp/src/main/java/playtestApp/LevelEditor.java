@@ -9,7 +9,6 @@ import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JTextField;
 import java.awt.event.ActionListener;
-import java.io.Console;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.awt.event.ActionEvent;
@@ -117,9 +116,40 @@ public class LevelEditor extends JFrame {
 
 	private void DeleteLevel()
 	{
-		// Delete the level from the database
-		// Delete all the reviews for the level, with the LevelID = levelInfo.id\
+		// First, store the LevelIndex of the level to be deleted in a variable
+		int levelIndex = -1; 
+
 		Connection conn; 
+
+		try
+		{
+			conn = DatabaseManager.getConnection(); 
+			
+			// Write a query string and a prepared statement to get the LevelIndex of the level to be deleted
+			String query = "SELECT LevelIndex FROM Levels WHERE LevelID = ?";
+			PreparedStatement stmt = conn.prepareStatement(query);
+
+			// Set the values of the prepared statement
+			stmt.setInt(1, levelInfo.id);
+
+			// Execute the query
+			ResultSet rs = stmt.executeQuery();
+
+			// Get the LevelIndex from the result set
+			rs.next();
+			levelIndex = rs.getInt("LevelIndex");
+
+			// Close the connection
+			conn.close();
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+
+
+		// Delete the level from the database
+		// Delete all the reviews for the level, with the LevelID = levelInfo.id
 
 		try
 		{
@@ -143,6 +173,29 @@ public class LevelEditor extends JFrame {
 
 			// Set the values of the prepared statement
 			stmt.setInt(1, levelInfo.id);
+
+			// Execute the query
+			stmt.executeUpdate();
+
+			// Close the connection
+			conn.close();
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+
+		// Update the LevelIndex of all the levels with a LevelIndex greater than the deleted level's LevelIndex
+		try
+		{
+			conn = DatabaseManager.getConnection(); 
+			
+			// Write a query string and a prepared statement to update the LevelIndex of all the levels with a LevelIndex greater than the deleted level's LevelIndex
+			String query = "UPDATE Levels SET LevelIndex = LevelIndex - 1 WHERE LevelIndex > ?";
+			PreparedStatement stmt = conn.prepareStatement(query);
+
+			// Set the values of the prepared statement
+			stmt.setInt(1, levelIndex);
 
 			// Execute the query
 			stmt.executeUpdate();
@@ -191,6 +244,7 @@ public class LevelEditor extends JFrame {
 
 	private void CloseWindow() {
 		// Close the window
+		parent.ShowLevels();
 		parent.setVisible(true);
 
 		this.setVisible(false);

@@ -71,7 +71,7 @@ public class LevelSelection extends JFrame {
 		contentPane.setLayout(null);
 		
 		lblTitle = new JLabel(DataManager.gameInfo.name + " - Levels");
-		lblTitle.setBounds(383, 10, 147, 16);
+		lblTitle.setBounds(296, 15, 147, 16);
 		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(lblTitle);
 		
@@ -139,15 +139,26 @@ public class LevelSelection extends JFrame {
 		});
 		btnNew.setBounds(629, 419, 117, 29);
 		contentPane.add(btnNew);
+		
+		JButton btnEdit = new JButton("Edit Game");
+		btnEdit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				OpenEditorWindow(); 
+			}
+		});
+		btnEdit.setBounds(520, 10, 117, 29);
+		contentPane.add(btnEdit);
 		// Hide the new level button if the user is not an admin
 		if (!DataManager.GetAdminStatus())
 			btnNew.setVisible(false);
 		
 		ShowLevels(); 
 	}
-	
-	private void ShowLevels() 
+
+	public void ShowLevels() 
 	{
+		lblTitle.setText(DataManager.gameInfo.name + " - Levels");
+
 		Connection conn; 
 		
 		try {
@@ -310,10 +321,16 @@ public class LevelSelection extends JFrame {
 		
 		LevelEditor levelEditor = new LevelEditor(this, isEdit); 
 		levelEditor.setVisible(true);
-		setVisible(false);   
+		// setVisible(false);   
+	}
+
+	private void OpenEditorWindow() 
+	{
+		GameEditor gameEditor = new GameEditor(this, true);
+		gameEditor.setVisible(true);
 	}
 	
-	private void OpenGamesScreen () 
+	public void OpenGamesScreen () 
 	{
 		DataManager.gameInfo.Reset(); 
 		parent.setVisible(true);

@@ -21,7 +21,6 @@
     <fullyQualifiedTypeName name="java.lang.Boolean"/>
     <fullyQualifiedTypeName name="javax.swing.JLabel"/>
     <fullyQualifiedTypeName name="javax.swing.JFrame"/>
-    <fullyQualifiedTypeName name="playtestApp.GameSelection"/>
     <fullyQualifiedTypeName name="javax.print.event.PrintJobAttributeEvent"/>
     <fullyQualifiedTypeName name="java.util.ArrayList"/>
     <fullyQualifiedTypeName name="java.lang.Integer"/>
@@ -31,4 +30,5 @@
     <fullyQualifiedTypeName name="playtestApp.DataManager"/>
     <fullyQualifiedTypeName name="java.sql.Savepoint"/>
     <fullyQualifiedTypeName name="javax.naming.OperationNotSupportedException"/>
+    <fullyQualifiedTypeName name="playtestApp.GameSelection"/>
 </qualifiedTypeNameHistroy>
