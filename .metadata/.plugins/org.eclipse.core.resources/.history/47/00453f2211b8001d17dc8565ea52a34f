@@ -1,0 +1,60 @@
+package playtestApp;
+
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.JScrollPane;
+
+public class AllReviews extends JFrame {
+
+	private JPanel contentPane;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					AllReviews frame = new AllReviews();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public AllReviews() {
+		setResizable(false);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 800, 500);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		JLabel lblTitle = new JLabel("Reviews");
+		lblTitle.setBounds(388, 20, 61, 16);
+		contentPane.add(lblTitle);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(43, 69, 371, 317);
+		contentPane.add(scrollPane);
+		
+		JTable tblReviews = new JTable();
+		scrollPane.setViewportView(tblReviews);
+		
+		JLabel lblFilter = new JLabel("New label");
+		lblFilter.setBounds(451, 70, 61, 16);
+		contentPane.add(lblFilter);
+	}
+}

@@ -117,6 +117,10 @@ public class GameSelection extends JFrame {
 		btnNew.setBounds(396, 5, 117, 29);
 		contentPane.add(btnNew);
 		
+		JButton btnAllReviews = new JButton("All Reviews");
+		btnAllReviews.setBounds(90, 10, 117, 29);
+		contentPane.add(btnAllReviews);
+		
 		ShowGames(); 
 	}
 

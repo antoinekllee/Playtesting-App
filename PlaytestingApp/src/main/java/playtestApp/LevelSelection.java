@@ -351,3 +351,5 @@ public class LevelSelection extends JFrame {
 		DataManager.OpenSettings(this);
 	}
 }
+
+// opposite effect of their intentions

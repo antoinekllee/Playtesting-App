@@ -81,7 +81,7 @@ public class GameEditor extends JFrame {
 		contentPane.add(txtName);
 		txtName.setColumns(10);
 		// Set the text of txtName to the name of the level
-		txtName.setText(isEdit ? gameName : "New Level");
+		txtName.setText(isEdit ? gameName : "New Game");
 		
 		JButton btnDelete = new JButton("Delete");
 		btnDelete.addActionListener(new ActionListener() {
@@ -311,6 +311,8 @@ public class GameEditor extends JFrame {
 	}
 
 	private void CloseWindow(Boolean wasDeleted) {
+
+		DataManager.gameInfo.name = txtName.getText();
 
 		// Try casting parent JFrame to LevelSelection. If there is an error, cast it to GameSelection
 		try
