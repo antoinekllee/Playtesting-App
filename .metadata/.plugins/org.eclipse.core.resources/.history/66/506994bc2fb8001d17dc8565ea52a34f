@@ -16,7 +16,6 @@ import javax.swing.JButton;
 import javax.swing.JTextField;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import javax.swing.JTextArea;
 
 public class AllReviews extends JFrame {
 
@@ -28,15 +27,6 @@ public class AllReviews extends JFrame {
 	private JComboBox<String> cmbCondition; 
 
 	private Vector<Vector<Object>> data = new Vector<Vector<Object>>(); 
-	private Vector<Vector<Object>> filteredData = new Vector<Vector<Object>>();
-
-	private Boolean advancedFilter = false; 
-	private JLabel lblField;
-	private JLabel lblCondition;
-	private JLabel lblValue;
-	private JButton btnAdvanced;
-	private JButton btnFilter;
-	private JTextArea txtAdvancedFilter;
 
 	/**
 	 * Launch the application.
@@ -83,7 +73,7 @@ public class AllReviews extends JFrame {
 		lblFilter.setBounds(50, 317, 61, 16);
 		contentPane.add(lblFilter);
 		
-		lblField = new JLabel("Field");
+		JLabel lblField = new JLabel("Field");
 		lblField.setBounds(43, 350, 61, 16);
 		contentPane.add(lblField);
 		
@@ -99,9 +89,9 @@ public class AllReviews extends JFrame {
 		cmbField.addItem("Game");
 		cmbField.addItem("Level");
 		cmbField.addItem("Difficulty");
-		cmbField.addItem("Time Taken");
+		cmbField.addItem("TimeTaken");
 		
-		lblCondition = new JLabel("Condition");
+		JLabel lblCondition = new JLabel("Condition");
 		lblCondition.setBounds(190, 350, 94, 16);
 		contentPane.add(lblCondition);
 		
@@ -110,7 +100,7 @@ public class AllReviews extends JFrame {
 		contentPane.add(cmbCondition);
 		UpdateConditions();
 		
-		lblValue = new JLabel("Value");
+		JLabel lblValue = new JLabel("Value");
 		lblValue.setBounds(333, 350, 94, 16);
 		contentPane.add(lblValue);
 		
@@ -119,7 +109,7 @@ public class AllReviews extends JFrame {
 		contentPane.add(txtValue);
 		txtValue.setColumns(10);
 
-		btnFilter = new JButton("Filter");
+		JButton btnFilter = new JButton("Filter");
 		btnFilter.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UpdateTable();
@@ -128,20 +118,10 @@ public class AllReviews extends JFrame {
 		btnFilter.setBounds(474, 377, 117, 29);
 		contentPane.add(btnFilter);
 		
-		btnAdvanced = new JButton("Advanced");
-		btnAdvanced.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				ToggleAdvanced(); 
-			}
-		});
+		JButton btnAdvanced = new JButton("Advanced");
 		btnAdvanced.setBounds(629, 377, 117, 29);
 		contentPane.add(btnAdvanced);
 		
-		txtAdvancedFilter = new JTextArea();
-		txtAdvancedFilter.setBounds(37, 336, 580, 111);
-		contentPane.add(txtAdvancedFilter);
-		
-		ToggleAdvanced();
 		GetReviews(); 
 	}
 
@@ -167,7 +147,7 @@ public class AllReviews extends JFrame {
 			cmbCondition.addItem("Equals");
 			cmbCondition.addItem("Not Equals");
 		}
-		else if (cmbField.getSelectedItem().equals("Difficulty") || cmbField.getSelectedItem().equals("Time Taken"))
+		else if (cmbField.getSelectedItem().equals("Difficulty") || cmbField.getSelectedItem().equals("TimeTaken"))
 		{
 			cmbCondition.addItem("Equals");
 			cmbCondition.addItem("Not Equals");
@@ -267,11 +247,17 @@ public class AllReviews extends JFrame {
 
 	private void UpdateTable()
 	{
-		FilterData();
+		String field = (String)cmbField.getSelectedItem();
+		String condition = (String)cmbCondition.getSelectedItem();
+		String value = txtValue.getText();
+
+		System.out.println("Field: " + field);
+		System.out.println("Condition: " + condition);
+		System.out.println("Value: " + value);
 
 		DefaultTableModel model = new DefaultTableModel(new String[]{"User", "Game", "Level", "Difficulty", "TimeTaken", "Suggestions", "Bugs"}, 0);
 		// Iterate through data
-		for (Vector<Object> row : filteredData)
+		for (Vector<Object> row : data)
 		{
 			String user = (String)row.get(0);
 			String gameName = (String)row.get(1);
@@ -281,45 +267,13 @@ public class AllReviews extends JFrame {
 			String suggestions = (String)row.get(5);
 			String bugs = (String)row.get(6);
 
-			model.addRow(new Object[]{user, gameName, levelName, difficulty, timeTaken, suggestions, bugs});
-		}
-
-		tblReviews.setModel(model);
-	}
-
-	private void FilterData()
-	{
-		filteredData = new Vector<Vector<Object>>();
-		
-		String field = (String)cmbField.getSelectedItem();
-		String condition = (String)cmbCondition.getSelectedItem();
-		String value = txtValue.getText();
-
-		if (field.equals("No Filter"))
-		{
-			filteredData = data;
-			return;
-		}
-
-		for (Vector<Object> row : data)
-		{
-			String user = (String)row.get(0);
-			String gameName = (String)row.get(1);
-			String levelName = (String)row.get(2);
-			String difficulty = (String)row.get(3);
-			String timeTaken = (String)row.get(4);
-
-			// Convert timeTaken to a rounded integer
-			int timeTakenInt = 0;
-			timeTakenInt = (int)Math.round(Double.parseDouble(timeTaken));
-			System.out.println("Time Taken: " + timeTakenInt);
-			
-			// Convert value to a rounded integer
-			int valueInt = 0;
-			valueInt = (int)Math.round(Double.parseDouble(value));
-			System.out.println("Value: " + valueInt);
-
 			Boolean shouldAddRow = false; 
+
+			if (field.equals("No Filter"))
+			{
+				model.addRow(new Object[]{user, gameName, levelName, difficulty, timeTaken, suggestions, bugs});
+				continue; 
+			}
 
 			if (field.equals("User"))
 			{
@@ -383,63 +337,11 @@ public class AllReviews extends JFrame {
 						shouldAddRow = true; 
 				}
 			}
-			else if (field.equals("Time Taken"))
-			{
-				if (condition.equals("Equals"))
-				{
-					if (timeTaken.equals(value))
-						shouldAddRow = true; 
-				}
-				else if (condition.equals("Not Equals"))
-				{
-					if (!timeTaken.equals(value))
-						shouldAddRow = true; 
-				}
-				else if (condition.equals("Greater Than"))
-				{
-					// if (Integer.parseInt(timeTaken) > Integer.parseInt(value))
-					if (timeTakenInt > valueInt)
-						shouldAddRow = true; 
-				}
-				else if (condition.equals("Less Than"))
-				{
-					// if (Integer.parseInt(timeTaken) < Integer.parseInt(value))
-					if (timeTakenInt < valueInt)
-						shouldAddRow = true; 
-				}
-			}
 
 			if (shouldAddRow)
-				filteredData.add(row);
+				model.addRow(new Object[]{user, gameName, levelName, difficulty, timeTaken, suggestions, bugs});
 		}
-	}
 
-	private void ToggleAdvanced()
-	{
-		if (advancedFilter)
-		{
-			btnAdvanced.setText("Advanced");
-			SetBasicFilterEnabled(false);
-			txtAdvancedFilter.setVisible(true);
-			advancedFilter = false;
-		}
-		else
-		{
-			btnAdvanced.setText("Basic");
-			SetBasicFilterEnabled(true);
-			txtAdvancedFilter.setVisible(false);
-			advancedFilter = true;
-		}
-	}
-
-	private void SetBasicFilterEnabled (Boolean isEnabled)
-	{
-		cmbField.setVisible(isEnabled);
-		cmbCondition.setVisible(isEnabled);
-		txtValue.setVisible(isEnabled);
-		lblField.setVisible(isEnabled);
-		lblValue.setVisible(isEnabled);
-		lblCondition.setVisible(isEnabled);
-		btnFilter.setVisible(isEnabled);
+		tblReviews.setModel(model);
 	}
 }
