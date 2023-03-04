@@ -53,7 +53,7 @@ public class GameEditor extends JFrame {
 	public GameEditor(Boolean isEdit) 
 	{
 		setResizable(false);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -69,15 +69,15 @@ public class GameEditor extends JFrame {
 		// 	levelInfo = DataManager.GetCurrLevel(); 
 		
 		JLabel lblTitle = new JLabel("Edit Game Info");
-		lblTitle.setBounds(180, 47, 149, 16);
+		lblTitle.setBounds(198, 66, 149, 16);
 		contentPane.add(lblTitle);
 		
 		JLabel lblName = new JLabel("Name");
-		lblName.setBounds(114, 121, 61, 16);
+		lblName.setBounds(125, 113, 61, 16);
 		contentPane.add(lblName);
 		
 		txtName = new JTextField();
-		txtName.setBounds(199, 116, 130, 26);
+		txtName.setBounds(198, 108, 130, 26);
 		contentPane.add(txtName);
 		txtName.setColumns(10);
 		// Set the text of txtName to the name of the level
@@ -89,7 +89,7 @@ public class GameEditor extends JFrame {
 				DeleteGame(); 
 			}
 		});
-		btnDelete.setBounds(103, 185, 117, 29);
+		btnDelete.setBounds(198, 196, 90, 29);
 		contentPane.add(btnDelete);
 		// Hide delete button if isEdit is false
 		btnDelete.setVisible(isEdit);
@@ -103,17 +103,20 @@ public class GameEditor extends JFrame {
 					NewGame();
 			}
 		});
-		btnSave.setBounds(231, 185, 117, 29);
+		btnSave.setBounds(198, 160, 90, 29);
 		contentPane.add(btnSave);
 		
-		JButton btnCancel = new JButton("Cancel");
+		JButton btnCancel = new JButton("x");
 		btnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				CloseWindow(false);
 			}
 		});
-		btnCancel.setBounds(39, 42, 117, 29);
+		btnCancel.setBounds(71, 61, 45, 29);
 		contentPane.add(btnCancel);
+
+		setLocationRelativeTo(null);
+		ColourManager.globalStyling(this); 
 	}
 
 	private void DeleteGame()

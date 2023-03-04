@@ -31,4 +31,7 @@
     <fullyQualifiedTypeName name="java.sql.Savepoint"/>
     <fullyQualifiedTypeName name="javax.naming.OperationNotSupportedException"/>
     <fullyQualifiedTypeName name="playtestApp.GameSelection"/>
+    <fullyQualifiedTypeName name="playtestApp.ReviewEditor"/>
+    <fullyQualifiedTypeName name="java.awt.Image"/>
+    <fullyQualifiedTypeName name="java.awt.Color"/>
 </qualifiedTypeNameHistroy>

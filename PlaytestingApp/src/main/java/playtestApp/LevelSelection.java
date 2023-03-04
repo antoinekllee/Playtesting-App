@@ -71,22 +71,22 @@ public class LevelSelection extends JFrame {
 		contentPane.setLayout(null);
 		
 		lblTitle = new JLabel(DataManager.gameInfo.name + " - Levels");
-		lblTitle.setBounds(296, 15, 147, 16);
+		lblTitle.setBounds(237, 26, 147, 16);
 		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(lblTitle);
 		
 		JLabel lblUser = new JLabel("Username");
 		lblUser.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblUser.setBounds(517, 26, 137, 16);
+		lblUser.setBounds(507, 26, 137, 16);
 		contentPane.add(lblUser);
 		
 		String username = DataManager.GetUsername(); 
-		Boolean isAdmin = DataManager.GetAdminStatus(); 
+		Boolean isAdmin = DataManager.GetAdminStatus();
 		
-		lblUser.setText(username + (isAdmin ? " (Admin)" : ""));
+		lblUser.setText(username);
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(90, 54, 654, 343);
+		scrollPane.setBounds(77, 64, 667, 352);
 		contentPane.add(scrollPane);
 		
 		DefaultTableModel tblModel = new DefaultTableModel () {
@@ -119,7 +119,7 @@ public class LevelSelection extends JFrame {
 				OpenGamesScreen(); 
 			}
 		});
-		btnGames.setBounds(124, 10, 55, 29);
+		btnGames.setBounds(77, 21, 55, 29);
 		contentPane.add(btnGames);
 		
 		btnSettings = new JButton("Settings");
@@ -128,29 +128,32 @@ public class LevelSelection extends JFrame {
 				OpenSettings(); 
 			}
 		});
-		btnSettings.setBounds(649, 13, 117, 29);
+		btnSettings.setBounds(649, 21, 95, 29);
 		contentPane.add(btnSettings);
 		
-		btnNew = new JButton("New Level");
+		btnNew = new JButton("New");
 		btnNew.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				OpenLevelEditor(-1, false);
 			}
 		});
-		btnNew.setBounds(629, 419, 117, 29);
+		btnNew.setBounds(428, 21, 66, 29);
 		contentPane.add(btnNew);
 		
-		JButton btnEdit = new JButton("Edit Game");
+		JButton btnEdit = new JButton("Edit");
 		btnEdit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				OpenEditorWindow(); 
 			}
 		});
-		btnEdit.setBounds(520, 10, 117, 29);
+		btnEdit.setBounds(496, 21, 66, 29);
 		contentPane.add(btnEdit);
 		// Hide the new level button if the user is not an admin
 		if (!DataManager.GetAdminStatus())
 			btnNew.setVisible(false);
+
+		setLocationRelativeTo(null);
+		ColourManager.globalStyling(this); 
 		
 		ShowLevels(); 
 	}

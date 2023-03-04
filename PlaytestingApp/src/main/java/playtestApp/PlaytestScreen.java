@@ -1,5 +1,6 @@
 package playtestApp;
 
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -79,7 +80,7 @@ public class PlaytestScreen extends JFrame {
 		
 		JLabel lblTitle = new JLabel(DataManager.gameInfo.name + " - " + levelInfo.name); 
 		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
-		lblTitle.setBounds(293, 44, 228, 16);
+		lblTitle.setBounds(294, 54, 228, 16);
 		contentPane.add(lblTitle);
 		
 		JButton btnLevels = new JButton("<-");
@@ -89,7 +90,7 @@ public class PlaytestScreen extends JFrame {
 				OpenLevelsScreen(); 
 			}
 		});
-		btnLevels.setBounds(33, 28, 55, 29);
+		btnLevels.setBounds(54, 28, 55, 29);
 		contentPane.add(btnLevels);
 		
 		JButton btnPrevLevel = new JButton("<");
@@ -102,7 +103,7 @@ public class PlaytestScreen extends JFrame {
 				setVisible(false);
 			}
 		});
-		btnPrevLevel.setBounds(188, 39, 35, 29);
+		btnPrevLevel.setBounds(185, 49, 35, 29);
 		contentPane.add(btnPrevLevel);
 		
 		JButton btnNextLevel = new JButton(">");
@@ -115,13 +116,13 @@ public class PlaytestScreen extends JFrame {
 				setVisible(false);
 			}
 		});
-		btnNextLevel.setBounds(568, 39, 35, 29);
+		btnNextLevel.setBounds(579, 49, 35, 29);
 		contentPane.add(btnNextLevel);
 		
 		lblTimer = new JLabel("00:00:00");
 		lblTimer.setFont(new Font("Lucida Grande", Font.PLAIN, 22));
 		lblTimer.setHorizontalAlignment(SwingConstants.CENTER);
-		lblTimer.setBounds(207, 122, 161, 43);
+		lblTimer.setBounds(188, 102, 161, 51);
 		contentPane.add(lblTimer);
 		
 		btnTimerPlayPause = new JButton("PLAY");
@@ -131,7 +132,7 @@ public class PlaytestScreen extends JFrame {
 				ToggleTimer();
 			}
 		});
-		btnTimerPlayPause.setBounds(369, 134, 88, 29);
+		btnTimerPlayPause.setBounds(345, 118, 88, 29);
 		contentPane.add(btnTimerPlayPause);
 		
 		JButton btnTimerEdit = new JButton("EDIT");
@@ -147,7 +148,7 @@ public class PlaytestScreen extends JFrame {
 				setEnabled(false);
 			}
 		});
-		btnTimerEdit.setBounds(469, 134, 88, 29);
+		btnTimerEdit.setBounds(434, 118, 88, 29);
 		contentPane.add(btnTimerEdit);
 		
 		sliderDifficulty = new JSlider();
@@ -158,38 +159,51 @@ public class PlaytestScreen extends JFrame {
 		sliderDifficulty.setPaintLabels(true);
 		sliderDifficulty.setPaintTicks(true);
 		sliderDifficulty.setMaximum(10);
-		sliderDifficulty.setBounds(331, 198, 190, 43);
+		sliderDifficulty.setBounds(345, 178, 184, 43);
 		sliderDifficulty.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) { 
 				UpdateDifficulty(sliderDifficulty.getValue()); 
 			}
 		});
+
+		UIManager.put("Slider.foreground", Color.decode(ColourManager.colourText));
+
+		// Set the line color of the slider
+		UIManager.put("Slider.trackColor", Color.decode(ColourManager.colourText));
+
+		// Set the color of the knob/slider of the slider
+		UIManager.put("Slider.thumb", Color.decode(ColourManager.colourText));
+
+		// Refresh the UI to apply the changes
+		SwingUtilities.updateComponentTreeUI(sliderDifficulty);
+		
 		// Set the default value of sliderDifficulty to 5
 		// sliderDifficulty.setValue(5);
 		contentPane.add(sliderDifficulty);
 		
 		JLabel lblDifficulty = new JLabel("Difficulty Rating");
-		lblDifficulty.setBounds(176, 212, 133, 16);
+		lblDifficulty.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblDifficulty.setBounds(188, 190, 133, 16);
 		contentPane.add(lblDifficulty);
 		
 		lblDifficultyValue = new JLabel("10");
-		lblDifficultyValue.setBounds(575, 212, 61, 16);
+		lblDifficultyValue.setBounds(553, 190, 61, 16);
 		contentPane.add(lblDifficultyValue);
 		
 		txtSuggestions = new JTextArea();
-		txtSuggestions.setBounds(188, 296, 184, 126);
+		txtSuggestions.setBounds(188, 273, 184, 126);
 		contentPane.add(txtSuggestions);
 		
 		txtBugs = new JTextArea();
-		txtBugs.setBounds(430, 296, 184, 126);
+		txtBugs.setBounds(430, 273, 184, 126);
 		contentPane.add(txtBugs);
 		
 		JLabel lblSuggestions = new JLabel("Suggestions");
-		lblSuggestions.setBounds(188, 268, 140, 16);
+		lblSuggestions.setBounds(188, 245, 140, 16);
 		contentPane.add(lblSuggestions);
 		
 		JLabel lblBugs = new JLabel("Bugs");
-		lblBugs.setBounds(430, 268, 61, 16);
+		lblBugs.setBounds(430, 245, 61, 16);
 		contentPane.add(lblBugs);
 		
 		JButton btnReset = new JButton("RESET");
@@ -202,7 +216,7 @@ public class PlaytestScreen extends JFrame {
 				SetTimer(0);
 			}
 		});
-		btnReset.setBounds(561, 134, 88, 29);
+		btnReset.setBounds(524, 118, 88, 29);
 		contentPane.add(btnReset);
 		
 		JButton btnSave = new JButton("Save");
@@ -211,12 +225,15 @@ public class PlaytestScreen extends JFrame {
 				SaveReview();  
 			}
 		});
-		btnSave.setBounds(345, 434, 117, 29);
+		btnSave.setBounds(345, 421, 117, 29);
 		contentPane.add(btnSave);
 		
 		lblStatus = new JLabel("");
 		lblStatus.setBounds(474, 434, 107, 16);
 		contentPane.add(lblStatus);
+
+		setLocationRelativeTo(null);
+		ColourManager.globalStyling(this); 
 
 		timer = new Timer(10, new TimerListener());
 
@@ -431,7 +448,7 @@ public class PlaytestScreen extends JFrame {
 				lblTimer.setText(time);
 
 				// Set the status label
-				lblStatus.setText("Level has already been reviewed!");
+//				lblStatus.setText("Level has already been reviewed!");
 
 				System.out.println("Review already exists!");
 				reviewExists = true; 

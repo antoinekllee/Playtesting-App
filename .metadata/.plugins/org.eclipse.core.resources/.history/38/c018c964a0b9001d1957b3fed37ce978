@@ -1,0 +1,87 @@
+package playtestApp;
+
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.SwingConstants;
+import javax.swing.ImageIcon;
+
+public class Menu extends JFrame {
+
+	private JPanel contentPane;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					Menu frame = new Menu();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public Menu() {
+		setResizable(false);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 100, 800, 500);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		JLabel lblTitle = new JLabel("PLAYTESTING APP");
+		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
+		lblTitle.setBounds(95, 144, 274, 16);
+		contentPane.add(lblTitle);
+		
+		JButton btnLogin = new JButton("Login");
+		btnLogin.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Login login = new Login();
+				login.setVisible(true);
+
+				// Close current window
+				dispose();
+			}
+		});
+		btnLogin.setBounds(166, 257, 117, 29);
+		contentPane.add(btnLogin);
+		
+		JButton btnSignup = new JButton("Signup");
+		btnSignup.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Signup signup = new Signup();
+				signup.setVisible(true);
+
+				// Close current window
+				dispose();
+			}
+		});
+		btnSignup.setBounds(166, 298, 117, 29);
+		contentPane.add(btnSignup);
+		
+		JLabel lblImage = new JLabel("");
+		lblImage.setIcon(new ImageIcon("/Users/antoinelee/Desktop/Gaming.jpg"));
+		lblImage.setBounds(6, 0, 794, 466);
+		contentPane.add(lblImage);
+		
+		setLocationRelativeTo(null);
+		ColourManager.globalStyling(this); 
+	}
+}

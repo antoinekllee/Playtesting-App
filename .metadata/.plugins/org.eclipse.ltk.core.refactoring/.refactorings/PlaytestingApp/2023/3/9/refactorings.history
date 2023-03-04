@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring clone="true" comment="Infer generic type arguments on &apos;PlaytestingApp&apos;&#x0A;- Original project: &apos;PlaytestingApp&apos;&#x0A;- Original elements:&#x0A;     playtestApp.ColourManager.java&#x0A;- Assume clone() returns an instance of the receiver type&#x0A;- Leave unconstrained type arguments raw" description="Infer generic type arguments" element1="/src\/main\/java=/optional=/true=/=/maven.pomderived=/true=/&lt;playtestApp{ColourManager.java" flags="6" id="org.eclipse.jdt.ui.infer.typearguments" leave="true" stamp="1677830758710" version="1.0"/>
+</session>

@@ -1,6 +1,7 @@
 package playtestApp;
 
 import java.awt.EventQueue;
+import java.awt.Image;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -8,6 +9,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.JTextField;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
@@ -15,12 +17,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.awt.event.ActionEvent;
+import javax.swing.JPasswordField;
 
 public class Login extends JFrame {
 
     private JPanel contentPane;
     private JTextField txtUsername;
-    private JTextField txtPassword;
+    // private JTextField txtPassword;
+    private JPasswordField txtPassword;
 
     /**
      * Launch the application.
@@ -53,7 +57,7 @@ public class Login extends JFrame {
 
         JLabel lblTitle = new JLabel("Login");
         lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
-        lblTitle.setBounds(371, 134, 61, 16);
+        lblTitle.setBounds(368, 137, 61, 16);
         contentPane.add(lblTitle);
 
         txtUsername = new JTextField();
@@ -63,18 +67,22 @@ public class Login extends JFrame {
 
         JLabel lblUsername = new JLabel("Username");
         lblUsername.setHorizontalAlignment(SwingConstants.RIGHT);
-        lblUsername.setBounds(199, 181, 99, 16);
+        lblUsername.setBounds(211, 181, 99, 16);
         contentPane.add(lblUsername);
 
         JLabel lblPassword = new JLabel("Password");
         lblPassword.setHorizontalAlignment(SwingConstants.RIGHT);
-        lblPassword.setBounds(199, 219, 99, 16);
+        lblPassword.setBounds(211, 219, 99, 16);
         contentPane.add(lblPassword);
 
-        txtPassword = new JTextField();
+        txtPassword = new JPasswordField();
         txtPassword.setColumns(10);
         txtPassword.setBounds(336, 214, 130, 26);
         contentPane.add(txtPassword);
+
+        // txtPassword = new JPasswordField();
+		// txtPassword.setBounds(481, 214, 155, 26);
+		// contentPane.add(passwordField);
 
         JButton btnLogin = new JButton("Login");
         btnLogin.addActionListener(new ActionListener() {
@@ -82,7 +90,7 @@ public class Login extends JFrame {
                 AttemptLogin(txtUsername.getText(), txtPassword.getText());
             }
         });
-        btnLogin.setBounds(349, 275, 117, 29);
+        btnLogin.setBounds(353, 271, 99, 29);
         contentPane.add(btnLogin);
         
         JButton btnMenu = new JButton("Menu");
@@ -91,8 +99,21 @@ public class Login extends JFrame {
         		OpenMenu(); 
         	}
         });
-        btnMenu.setBounds(53, 52, 117, 29);
+        btnMenu.setBounds(43, 39, 93, 29);
         contentPane.add(btnMenu);
+
+        ImageIcon icon = new ImageIcon(Menu.class.getResource("/images/background.jpg")); 
+		Image image = icon.getImage(); 
+    	Image newImg = image.getScaledInstance(800, 500, Image.SCALE_SMOOTH); 
+    	icon = new ImageIcon(newImg); 
+		JLabel lblImage = new JLabel("");
+		lblImage.setBounds(0, 0, 800, 472);
+		lblImage.setHorizontalAlignment(SwingConstants.CENTER);
+		lblImage.setIcon(icon); 
+		contentPane.add(lblImage);
+
+        setLocationRelativeTo(null);
+		ColourManager.globalStyling(this); 
     }
 
     private void AttemptLogin (String username, String password)
@@ -144,28 +165,4 @@ public class Login extends JFrame {
         menu.setVisible(true);
         setVisible(false);
     }
-    
-    // Write a method to edit a user's password in the database
-    // private void ChangePassword(String username)
-    // {
-    //     System.out.println("ATTEMPTING TO CHANGE PASSWORD FOR " + username);
-
-    //     Connection conn;
-
-    //     try {
-    //         conn = DatabaseManager.getConnection();
-
-    //         String query = "UPDATE Users SET Password=? WHERE Username=?";
-    //         PreparedStatement stmt = conn.prepareStatement(query);
-
-    //         stmt.setString(1, "newPassword");
-    //         stmt.setString(2, username);
-
-    //         stmt.executeUpdate();
-
-    //         System.out.println("PASSWORD CHANGE SUCCESSFUL");
-    //     } catch (SQLException e) {
-    //         e.printStackTrace();
-    //     }
-    // }
 }

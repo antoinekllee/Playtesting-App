@@ -1,0 +1,339 @@
+package playtestApp;
+
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import javax.swing.JButton;
+import javax.swing.JTextField;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Vector;
+import java.awt.event.ActionEvent;
+import java.sql.*;
+
+public class GameEditor extends JFrame {
+
+	private JPanel contentPane;
+
+	private JFrame parent = null;
+	// private DataManager.EntryInfo levelInfo = null; 
+	private JTextField txtName;
+
+	private String gameName = ""; 
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					GameEditor frame = new GameEditor(false);
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	public GameEditor(JFrame parent, Boolean isEdit)
+	{
+		this(isEdit);
+		this.parent = parent; 
+	}
+
+	/**
+	 * @wbp.parser.constructor
+	 */
+	public GameEditor(Boolean isEdit) 
+	{
+		setResizable(false);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 450, 300);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setAlwaysOnTop(true);
+
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+
+		if (isEdit)
+			gameName = DataManager.gameInfo.name; 
+		
+		// if (isEdit)
+		// 	levelInfo = DataManager.GetCurrLevel(); 
+		
+		JLabel lblTitle = new JLabel("Edit Game Info");
+		lblTitle.setBounds(180, 47, 149, 16);
+		contentPane.add(lblTitle);
+		
+		JLabel lblName = new JLabel("Name");
+		lblName.setBounds(114, 121, 61, 16);
+		contentPane.add(lblName);
+		
+		txtName = new JTextField();
+		txtName.setBounds(199, 116, 130, 26);
+		contentPane.add(txtName);
+		txtName.setColumns(10);
+		// Set the text of txtName to the name of the level
+		txtName.setText(isEdit ? gameName : "New Game");
+		
+		JButton btnDelete = new JButton("Delete");
+		btnDelete.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				DeleteGame(); 
+			}
+		});
+		btnDelete.setBounds(103, 185, 117, 29);
+		contentPane.add(btnDelete);
+		// Hide delete button if isEdit is false
+		btnDelete.setVisible(isEdit);
+		
+		JButton btnSave = new JButton("Save");
+		btnSave.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (isEdit) 
+					SaveGameInfo(); 
+				else
+					NewGame();
+			}
+		});
+		btnSave.setBounds(231, 185, 117, 29);
+		contentPane.add(btnSave);
+		
+		JButton btnCancel = new JButton("Cancel");
+		btnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				CloseWindow(false);
+			}
+		});
+		btnCancel.setBounds(39, 42, 117, 29);
+		contentPane.add(btnCancel);
+
+		setLocationRelativeTo(null);
+		ColourManager.globalStyling(this); 
+	}
+
+	private void DeleteGame()
+	{
+		// Delete the game from the database
+		Connection conn = null;
+
+		try
+		{
+			conn = DatabaseManager.getConnection(); 
+
+			// Create a new entry in the Games table
+			String sql = "DELETE FROM Games WHERE GameID = ?";
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, DataManager.gameInfo.id);
+			pstmt.executeUpdate();
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e.getMessage());
+		}
+		finally
+		{
+			try
+			{
+				if (conn != null)
+					conn.close();
+			}
+			catch (SQLException ex)
+			{
+				System.out.println(ex.getMessage());
+			}
+		}
+
+		// Store a list of all the levels with this GameID before deleting levels
+		Vector<Integer> levelIDs = GetGameLevels(); 
+
+		// Delete all levels in the Levels table with GameID = DataManager.gameInfo.id
+		try
+		{
+			conn = DatabaseManager.getConnection(); 
+
+			// Create a new entry in the Games table
+			String sql = "DELETE FROM Levels WHERE GameID = ?";
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, DataManager.gameInfo.id);
+			pstmt.executeUpdate();
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e.getMessage());
+		}
+		finally
+		{
+			try
+			{
+				if (conn != null)
+					conn.close();
+			}
+			catch (SQLException ex)
+			{
+				System.out.println(ex.getMessage());
+			}
+		}
+
+		// From the Reviews table, delete all reviews with a levelID in levelIDs
+		try
+		{
+			conn = DatabaseManager.getConnection(); 
+
+			// Create a new entry in the Games table
+			String sql = "DELETE FROM Reviews WHERE LevelID = ?";
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			for (int i = 0; i < levelIDs.size(); i++)
+			{
+				pstmt.setInt(1, levelIDs.get(i));
+				pstmt.executeUpdate();
+			}
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e.getMessage());
+		}
+		finally
+		{
+			try
+			{
+				if (conn != null)
+					conn.close();
+			}
+			catch (SQLException ex)
+			{
+				System.out.println(ex.getMessage());
+			}
+		}
+
+		CloseWindow(true);
+	}
+
+	private Vector<Integer> GetGameLevels() // Get a vector of all the ids of levels with GameID = DataManager.gameInfo.id
+	{
+		Vector<Integer> levelIDs = new Vector<Integer>();
+
+		Connection conn; 
+
+		try
+		{
+			conn = DatabaseManager.getConnection(); 
+
+			// Create a new entry in the Games table
+			String sql = "SELECT LevelID FROM Levels WHERE GameID = ?";
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, DataManager.gameInfo.id);
+			ResultSet rs = pstmt.executeQuery();
+
+			// Loop through the result set
+			while (rs.next())
+			{
+				// Add the level id to the vector
+				levelIDs.add(rs.getInt("LevelID"));
+			}
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e.getMessage());
+		}
+
+		return levelIDs;
+	}
+
+	private void SaveGameInfo()
+	{
+		// Update the database in the Games table for this GameID with the new name
+		// Get the name of the game from txtName
+		String name = txtName.getText();
+
+		Connection conn; 
+
+		try
+		{
+			conn = DatabaseManager.getConnection(); 
+
+			// Create a new entry in the Games table
+			String sql = "UPDATE Games SET Name = ? WHERE GameID = ?";
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, name);
+			pstmt.setInt(2, DataManager.gameInfo.id);
+			pstmt.executeUpdate();
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e.getMessage());
+		}
+
+		CloseWindow(false);
+	}
+
+	private void NewGame ()
+	{
+		// Create a new game in the Games table in the database. It's name should be equal to the text in txtName
+		// Get the name of the game from txtName
+		String name = txtName.getText();
+
+		// Create a new entry in the Games table
+		Connection conn = null;
+
+		try
+		{
+			conn = DatabaseManager.getConnection(); 
+
+			// Create a new entry in the Games table
+			String sql = "INSERT INTO Games (Name) VALUES (?)";
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, name);
+			pstmt.executeUpdate();
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e.getMessage());
+		}
+		finally
+		{
+			try
+			{
+				if (conn != null)
+					conn.close();
+			}
+			catch (SQLException ex)
+			{
+				System.out.println(ex.getMessage());
+			}
+		}
+		
+		CloseWindow(false);
+	}
+
+	private void CloseWindow(Boolean wasDeleted) {
+
+		DataManager.gameInfo.name = txtName.getText();
+
+		// Try casting parent JFrame to LevelSelection. If there is an error, cast it to GameSelection
+		try
+		{
+			LevelSelection levelSelection = (LevelSelection) parent;
+			if (wasDeleted)
+				levelSelection.OpenGamesScreen();
+			else
+				levelSelection.ShowLevels();
+		}
+		catch (Exception e)
+		{
+			GameSelection gameSelection = (GameSelection) parent;
+			gameSelection.ShowGames();
+		}
+
+		// Close the window
+		this.setVisible(false);
+		this.dispose();
+	}
+}

@@ -9,6 +9,7 @@ import javax.swing.JLabel;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.SwingConstants;
 
 public class Settings extends JFrame {
 
@@ -44,7 +45,7 @@ public class Settings extends JFrame {
 	 */
 	public Settings() {
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
+		setBounds(100, 100, 250, 200);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setResizable(false);
@@ -54,11 +55,12 @@ public class Settings extends JFrame {
 		contentPane.setLayout(null);
 		
 		JLabel lblSettings = new JLabel("Settings");
-		lblSettings.setBounds(178, 20, 61, 16);
+		lblSettings.setBounds(102, 25, 61, 16);
 		contentPane.add(lblSettings);
 		
-		JLabel lblUser = new JLabel("User");
-		lblUser.setBounds(46, 61, 61, 16);
+		JLabel lblUser = new JLabel("User: tUser1");
+		lblUser.setHorizontalAlignment(SwingConstants.CENTER);
+		lblUser.setBounds(40, 68, 176, 16);
 		contentPane.add(lblUser);
 		
 		JButton btnLogout = new JButton("Log Out");
@@ -68,17 +70,16 @@ public class Settings extends JFrame {
 				Logout(); 
 			}
 		});
-		btnLogout.setBounds(46, 94, 86, 29);
+		btnLogout.setBounds(85, 115, 86, 29);
 		contentPane.add(btnLogout);
-		
-		JLabel lblUsername = new JLabel("Logged in as: USERNAME");
-		lblUsername.setBounds(215, 61, 182, 16);
-		contentPane.add(lblUsername);
 
 		String username = DataManager.GetUsername(); 
-		Boolean isAdmin = DataManager.GetAdminStatus(); 
+		Boolean isAdmin = DataManager.GetAdminStatus();
 		
-		lblUsername.setText(username + (isAdmin ? " (Admin)" : ""));
+		lblUser.setText("User: " + username);
+
+		setLocationRelativeTo(null);
+		ColourManager.globalStyling(this); 
 	}
 
 	private void Logout()

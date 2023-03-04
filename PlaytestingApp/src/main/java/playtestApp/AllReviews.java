@@ -15,6 +15,9 @@ import javax.swing.JComboBox;
 import javax.swing.JButton;
 import javax.swing.JTextField;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextArea;
 
@@ -30,13 +33,16 @@ public class AllReviews extends JFrame {
 	private Vector<Vector<Object>> data = new Vector<Vector<Object>>(); 
 	private Vector<Vector<Object>> filteredData = new Vector<Vector<Object>>();
 
-	private Boolean advancedFilter = false; 
+	private Boolean basicFilter = false; 
 	private JLabel lblField;
 	private JLabel lblCondition;
 	private JLabel lblValue;
 	private JButton btnAdvanced;
 	private JButton btnFilter;
 	private JTextArea txtAdvancedFilter;
+
+	private GameSelection parent = null; 
+	private JButton btnBack;
 
 	/**
 	 * Launch the application.
@@ -52,6 +58,12 @@ public class AllReviews extends JFrame {
 				}
 			}
 		});
+	}
+
+	public AllReviews (GameSelection parent)
+	{
+		this();
+		this.parent = parent; 
 	}
 
 	/**
@@ -73,25 +85,41 @@ public class AllReviews extends JFrame {
 		contentPane.add(lblTitle);
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(43, 69, 714, 224);
+		scrollPane.setBounds(77, 64, 667, 223);
 		contentPane.add(scrollPane);
 		
 		tblReviews = new JTable();
+		// Set the table to be non-editable
+		tblReviews.setDefaultEditor(Object.class, null);
+		// Print the row index when a row is double clicked
+		tblReviews.addMouseListener(new java.awt.event.MouseAdapter() {
+			@Override
+			public void mouseClicked(java.awt.event.MouseEvent evt) {
+				int row = tblReviews.rowAtPoint(evt.getPoint());
+				if (evt.getClickCount() == 2 && row != -1) 
+				{
+					int reviewId = Integer.parseInt(data.get(row).get(7).toString());
+					ReviewEditor reviewEditor = new ReviewEditor(reviewId, AllReviews.this);
+					reviewEditor.setVisible(true);
+				}
+			}
+		});
+		
 		scrollPane.setViewportView(tblReviews);
 		
 		JLabel lblFilter = new JLabel("Filter");
-		lblFilter.setBounds(50, 317, 61, 16);
+		lblFilter.setBounds(77, 322, 61, 16);
 		contentPane.add(lblFilter);
 		
 		lblField = new JLabel("Field");
-		lblField.setBounds(43, 350, 61, 16);
+		lblField.setBounds(77, 361, 61, 16);
 		contentPane.add(lblField);
 		
 		cmbField = new JComboBox<String>();
 		cmbField.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) { UpdateConditions(); }
 		});
-		cmbField.setBounds(53, 378, 117, 27);
+		cmbField.setBounds(77, 389, 117, 27);
 		contentPane.add(cmbField);
 		// Set options for each of the following: "User", "Game", "Level", "Difficulty", "TimeTaken"
 		cmbField.addItem("No Filter");
@@ -102,30 +130,43 @@ public class AllReviews extends JFrame {
 		cmbField.addItem("Time Taken");
 		
 		lblCondition = new JLabel("Condition");
-		lblCondition.setBounds(190, 350, 94, 16);
+		lblCondition.setBounds(228, 361, 94, 16);
 		contentPane.add(lblCondition);
 		
 		cmbCondition = new JComboBox<String>();
-		cmbCondition.setBounds(182, 378, 117, 27);
+		cmbCondition.setBounds(228, 389, 117, 27);
 		contentPane.add(cmbCondition);
 		UpdateConditions();
 		
 		lblValue = new JLabel("Value");
-		lblValue.setBounds(333, 350, 94, 16);
+		lblValue.setBounds(388, 361, 94, 16);
 		contentPane.add(lblValue);
 		
 		txtValue = new JTextField();
-		txtValue.setBounds(319, 377, 130, 26);
+		txtValue.setBounds(387, 388, 130, 26);
 		contentPane.add(txtValue);
 		txtValue.setColumns(10);
 
 		btnFilter = new JButton("Filter");
 		btnFilter.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				UpdateTable();
+				if (basicFilter)
+				{
+					BasicFilter();
+					UpdateTable();
+				}
+				else 
+				{
+					System.out.println("CALLING GPT");
+					try {
+						GenerateSQL();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					} 
+				}
 			}
 		});
-		btnFilter.setBounds(474, 377, 117, 29);
+		btnFilter.setBounds(594, 402, 117, 29);
 		contentPane.add(btnFilter);
 		
 		btnAdvanced = new JButton("Advanced");
@@ -134,12 +175,26 @@ public class AllReviews extends JFrame {
 				ToggleAdvanced(); 
 			}
 		});
-		btnAdvanced.setBounds(629, 377, 117, 29);
+		btnAdvanced.setBounds(594, 361, 117, 29);
 		contentPane.add(btnAdvanced);
 		
 		txtAdvancedFilter = new JTextArea();
-		txtAdvancedFilter.setBounds(37, 336, 580, 111);
+		txtAdvancedFilter.setBounds(77, 350, 493, 93);
 		contentPane.add(txtAdvancedFilter);
+		
+		btnBack = new JButton("<-");
+		btnBack.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) 
+			{
+				AllReviews.this.setVisible(false);
+				parent.setVisible(true);
+			}
+		});
+		btnBack.setBounds(77, 15, 75, 29);
+		contentPane.add(btnBack);
+
+		setLocationRelativeTo(null);
+		ColourManager.globalStyling(this); 
 		
 		ToggleAdvanced();
 		GetReviews(); 
@@ -189,7 +244,7 @@ public class AllReviews extends JFrame {
 			// Join the Reviews table with the Levels table to get the LevelName
 			// Join the Reviews table with the Users table to get the Username
 
-			String sql = "SELECT LevelName, GameID, Username, Difficulty, TimeTaken, Suggestions, Bugs FROM Reviews JOIN Levels ON Reviews.LevelID = Levels.LevelID JOIN Users ON Reviews.UserID = Users.UserID";
+			String sql = "SELECT LevelName, GameID, Username, Difficulty, TimeTaken, Suggestions, Bugs, ReviewID FROM Reviews JOIN Levels ON Reviews.LevelID = Levels.LevelID JOIN Users ON Reviews.UserID = Users.UserID";
 			// String sql = "SELECT * FROM Reviews";
 
 			PreparedStatement stmt = conn.prepareStatement(sql);
@@ -225,11 +280,14 @@ public class AllReviews extends JFrame {
 				row.add(suggestions);
 				row.add(bugs);
 
+				row.add(rs.getInt("ReviewID"));
+
 				data.add(row);
 			}
 
 			conn.close();
 
+			BasicFilter(); 
 			UpdateTable(); 
 		}
 		catch (SQLException e)
@@ -267,8 +325,6 @@ public class AllReviews extends JFrame {
 
 	private void UpdateTable()
 	{
-		FilterData();
-
 		DefaultTableModel model = new DefaultTableModel(new String[]{"User", "Game", "Level", "Difficulty", "TimeTaken", "Suggestions", "Bugs"}, 0);
 		// Iterate through data
 		for (Vector<Object> row : filteredData)
@@ -287,18 +343,18 @@ public class AllReviews extends JFrame {
 		tblReviews.setModel(model);
 	}
 
-	private void FilterData()
+	private void BasicFilter()
 	{
 		filteredData = new Vector<Vector<Object>>();
 		
-		String field = (String)cmbField.getSelectedItem();
-		String condition = (String)cmbCondition.getSelectedItem();
-		String value = txtValue.getText();
+		String field = (String)cmbField.getSelectedItem(); 
+		String condition = (String)cmbCondition.getSelectedItem(); 
+		String value = txtValue.getText(); 
 
-		if (field.equals("No Filter"))
+		if (field.equals("No Filter")) 
 		{
-			filteredData = data;
-			return;
+			filteredData = data; 
+			return; 
 		}
 
 		for (Vector<Object> row : data)
@@ -316,8 +372,11 @@ public class AllReviews extends JFrame {
 			
 			// Convert value to a rounded integer
 			int valueInt = 0;
-			valueInt = (int)Math.round(Double.parseDouble(value));
-			System.out.println("Value: " + valueInt);
+			if (field.equals("Time Taken") || field.equals("Difficulty"))
+			{
+				valueInt = (int)Math.round(Double.parseDouble(value));
+				System.out.println("Value: " + valueInt);
+			}
 
 			Boolean shouldAddRow = false; 
 
@@ -416,19 +475,19 @@ public class AllReviews extends JFrame {
 
 	private void ToggleAdvanced()
 	{
-		if (advancedFilter)
+		if (basicFilter)
 		{
 			btnAdvanced.setText("Advanced");
 			SetBasicFilterEnabled(false);
 			txtAdvancedFilter.setVisible(true);
-			advancedFilter = false;
+			basicFilter = false;
 		}
 		else
 		{
 			btnAdvanced.setText("Basic");
 			SetBasicFilterEnabled(true);
 			txtAdvancedFilter.setVisible(false);
-			advancedFilter = true;
+			basicFilter = true;
 		}
 	}
 
@@ -440,6 +499,99 @@ public class AllReviews extends JFrame {
 		lblField.setVisible(isEnabled);
 		lblValue.setVisible(isEnabled);
 		lblCondition.setVisible(isEnabled);
-		btnFilter.setVisible(isEnabled);
+		// btnFilter.setVisible(isEnabled);
+	}
+
+	private void GenerateSQL () throws IOException
+	{
+		ProcessBuilder pb = new ProcessBuilder("/Library/Frameworks/Python.framework/Versions/3.10/bin/python3.10", "src/main/gpt/gpt.py", (String)txtAdvancedFilter.getText());
+	    Process process = pb.start();
+
+	    // Read the output of the Python script
+		BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+	    String sql = in.readLine(); 
+
+		// Read the error of the Python script
+		BufferedReader err = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+	    String lineErr = null;
+	    while ((lineErr = err.readLine()) != null) {
+	        System.out.println(lineErr);
+		}
+
+		System.out.println(sql);
+
+		AdvancedFilter(sql);
+		UpdateTable();
+	}
+
+	private void AdvancedFilter(String query)
+	{
+		
+		String sql = "SELECT LevelName, GameID, Username, Difficulty, TimeTaken, Suggestions, Bugs, ReviewID FROM Reviews JOIN Levels ON Reviews.LevelID = Levels.LevelID JOIN Users ON Reviews.UserID = Users.UserID WHERE " + query;
+		System.out.println(sql);
+		
+		Connection conn; 
+		
+		try
+		{
+			conn = DatabaseManager.getConnection(); 
+			
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+			
+			// DefaultTableModel model = new DefaultTableModel(new String[]{"User", "Game", "Level", "Difficulty", "TimeTaken", "Suggestions", "Bugs"}, 0);
+			filteredData = new Vector<Vector<Object>>();
+
+			while (rs.next())
+			{
+				Vector<Object> row = new Vector<Object>();
+
+				String user = rs.getString("Username");
+
+				String levelName = rs.getString("LevelName"); 
+				int gameId = rs.getInt("GameID");
+				String gameName = GetGame(gameId);
+
+				String difficulty = rs.getString("Difficulty");
+				String timeTaken = rs.getString("TimeTaken");
+				String suggestions = rs.getString("Suggestions");
+				String bugs = rs.getString("Bugs");
+
+				if (suggestions.equals(""))
+					suggestions = "-";
+
+				if (bugs.equals(""))
+					bugs = "-";
+
+				row.add(user); 
+				row.add(gameName);
+				row.add(levelName);
+				row.add(difficulty);
+				row.add(timeTaken);
+				row.add(suggestions);
+				row.add(bugs);
+				row.add(rs.getInt("ReviewID"));
+
+				// model.addRow(row);
+				filteredData.add(row);
+			}
+			
+			// tblReviews.setModel(model);
+
+			System.out.println("DONE");
+
+			UpdateTable();
+			
+			conn.close();
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	public void Reset ()
+	{
+		GetReviews(); 
 	}
 }

@@ -1,0 +1,597 @@
+package playtestApp;
+
+import java.awt.EventQueue;
+import java.sql.*;
+import java.util.Vector;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.JScrollPane;
+import javax.swing.JComboBox;
+import javax.swing.JButton;
+import javax.swing.JTextField;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.awt.event.ActionEvent;
+import javax.swing.JTextArea;
+
+public class AllReviews extends JFrame {
+
+	private JPanel contentPane;
+
+	private JTable tblReviews = null; 
+	private JComboBox<String> cmbField;
+	private JTextField txtValue;
+	private JComboBox<String> cmbCondition; 
+
+	private Vector<Vector<Object>> data = new Vector<Vector<Object>>(); 
+	private Vector<Vector<Object>> filteredData = new Vector<Vector<Object>>();
+
+	private Boolean basicFilter = false; 
+	private JLabel lblField;
+	private JLabel lblCondition;
+	private JLabel lblValue;
+	private JButton btnAdvanced;
+	private JButton btnFilter;
+	private JTextArea txtAdvancedFilter;
+
+	private GameSelection parent = null; 
+	private JButton btnBack;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					AllReviews frame = new AllReviews();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	public AllReviews (GameSelection parent)
+	{
+		this();
+		this.parent = parent; 
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public AllReviews() 
+	{
+		setResizable(false);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 800, 500);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		JLabel lblTitle = new JLabel("Reviews");
+		lblTitle.setBounds(388, 20, 61, 16);
+		contentPane.add(lblTitle);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(77, 64, 667, 223);
+		contentPane.add(scrollPane);
+		
+		tblReviews = new JTable();
+		// Set the table to be non-editable
+		tblReviews.setDefaultEditor(Object.class, null);
+		// Print the row index when a row is double clicked
+		tblReviews.addMouseListener(new java.awt.event.MouseAdapter() {
+			@Override
+			public void mouseClicked(java.awt.event.MouseEvent evt) {
+				int row = tblReviews.rowAtPoint(evt.getPoint());
+				if (evt.getClickCount() == 2 && row != -1) 
+				{
+					int reviewId = Integer.parseInt(data.get(row).get(7).toString());
+					ReviewEditor reviewEditor = new ReviewEditor(reviewId, AllReviews.this);
+					reviewEditor.setVisible(true);
+				}
+			}
+		});
+		
+		scrollPane.setViewportView(tblReviews);
+		
+		JLabel lblFilter = new JLabel("Filter");
+		lblFilter.setBounds(77, 322, 61, 16);
+		contentPane.add(lblFilter);
+		
+		lblField = new JLabel("Field");
+		lblField.setBounds(77, 361, 61, 16);
+		contentPane.add(lblField);
+		
+		cmbField = new JComboBox<String>();
+		cmbField.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) { UpdateConditions(); }
+		});
+		cmbField.setBounds(77, 389, 117, 27);
+		contentPane.add(cmbField);
+		// Set options for each of the following: "User", "Game", "Level", "Difficulty", "TimeTaken"
+		cmbField.addItem("No Filter");
+		cmbField.addItem("User");
+		cmbField.addItem("Game");
+		cmbField.addItem("Level");
+		cmbField.addItem("Difficulty");
+		cmbField.addItem("Time Taken");
+		
+		lblCondition = new JLabel("Condition");
+		lblCondition.setBounds(228, 361, 94, 16);
+		contentPane.add(lblCondition);
+		
+		cmbCondition = new JComboBox<String>();
+		cmbCondition.setBounds(228, 389, 117, 27);
+		contentPane.add(cmbCondition);
+		UpdateConditions();
+		
+		lblValue = new JLabel("Value");
+		lblValue.setBounds(388, 361, 94, 16);
+		contentPane.add(lblValue);
+		
+		txtValue = new JTextField();
+		txtValue.setBounds(387, 388, 130, 26);
+		contentPane.add(txtValue);
+		txtValue.setColumns(10);
+
+		btnFilter = new JButton("Filter");
+		btnFilter.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (basicFilter)
+				{
+					BasicFilter();
+					UpdateTable();
+				}
+				else 
+				{
+					System.out.println("CALLING GPT");
+					try {
+						GenerateSQL();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					} 
+				}
+			}
+		});
+		btnFilter.setBounds(582, 397, 117, 29);
+		contentPane.add(btnFilter);
+		
+		btnAdvanced = new JButton("Advanced");
+		btnAdvanced.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ToggleAdvanced(); 
+			}
+		});
+		btnAdvanced.setBounds(582, 356, 117, 29);
+		contentPane.add(btnAdvanced);
+		
+		txtAdvancedFilter = new JTextArea();
+		txtAdvancedFilter.setBounds(77, 350, 493, 93);
+		contentPane.add(txtAdvancedFilter);
+		
+		btnBack = new JButton("<-");
+		btnBack.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) 
+			{
+				AllReviews.this.setVisible(false);
+				parent.setVisible(true);
+			}
+		});
+		btnBack.setBounds(77, 15, 75, 29);
+		contentPane.add(btnBack);
+
+		setLocationRelativeTo(null);
+		ColourManager.globalStyling(this); 
+		
+		ToggleAdvanced();
+		GetReviews(); 
+	}
+
+	private void UpdateConditions()
+	{
+		if (cmbCondition == null) return; 
+
+		// If the user selects "User", "Game" or "Level" then the options are "Equals" and "Not Equals"
+		// If the user selects "Difficulty" then the options are "Equals", "Not Equals", "Greater Than" and "Less Than"
+		// If the user selects "TimeTaken" then the options are "Equals", "Not Equals", "Greater Than" and "Less Than"
+		
+		// First, reset the cmbCondition options
+		cmbCondition.removeAllItems();
+
+		if (cmbField.getSelectedItem().equals("No Filter"))
+		{
+			cmbCondition.addItem("-");
+			return;
+		}
+
+		if (cmbField.getSelectedItem().equals("User") || cmbField.getSelectedItem().equals("Game") || cmbField.getSelectedItem().equals("Level"))
+		{
+			cmbCondition.addItem("Equals");
+			cmbCondition.addItem("Not Equals");
+		}
+		else if (cmbField.getSelectedItem().equals("Difficulty") || cmbField.getSelectedItem().equals("Time Taken"))
+		{
+			cmbCondition.addItem("Equals");
+			cmbCondition.addItem("Not Equals");
+			cmbCondition.addItem("Greater Than");
+			cmbCondition.addItem("Less Than");
+		}
+	}
+
+	private void GetReviews() // Get all reviews, only called once
+	{
+		Connection conn; 
+
+		try
+		{
+			conn = DatabaseManager.getConnection(); 
+
+			// Query the Reviews table in the database and output all the reviews to the tblReviews table
+			// The columns are LevelID, UserID, Difficulty, TimeTaken, Suggestions and Bugs
+			// Join the Reviews table with the Levels table to get the LevelName
+			// Join the Reviews table with the Users table to get the Username
+
+			String sql = "SELECT LevelName, GameID, Username, Difficulty, TimeTaken, Suggestions, Bugs, ReviewID FROM Reviews JOIN Levels ON Reviews.LevelID = Levels.LevelID JOIN Users ON Reviews.UserID = Users.UserID";
+			// String sql = "SELECT * FROM Reviews";
+
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			ResultSet rs = stmt.executeQuery();
+			
+			data = new Vector<Vector<Object>>();
+			while (rs.next())
+			{
+				Vector<Object> row = new Vector<Object>();
+
+				String user = rs.getString("Username");
+
+				String levelName = rs.getString("LevelName"); 
+				int gameId = rs.getInt("GameID");
+				String gameName = GetGame(gameId);
+
+				String difficulty = rs.getString("Difficulty");
+				String timeTaken = rs.getString("TimeTaken");
+				String suggestions = rs.getString("Suggestions");
+				String bugs = rs.getString("Bugs");
+
+				if (suggestions.equals(""))
+					suggestions = "-";
+
+				if (bugs.equals(""))
+					bugs = "-";
+
+				row.add(user); 
+				row.add(gameName);
+				row.add(levelName);
+				row.add(difficulty);
+				row.add(timeTaken);
+				row.add(suggestions);
+				row.add(bugs);
+
+				row.add(rs.getInt("ReviewID"));
+
+				data.add(row);
+			}
+
+			conn.close();
+
+			BasicFilter(); 
+			UpdateTable(); 
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	private String GetGame (int gameId)
+	{
+		Connection conn; 
+
+		try 
+		{
+			conn = DatabaseManager.getConnection();
+			
+			String sql = "SELECT Name FROM Games WHERE GameID = ?";
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			stmt.setInt(1, gameId);
+			ResultSet rs = stmt.executeQuery();
+
+			if (rs.next())
+			{
+				String gameName = rs.getString("Name");
+				return gameName;
+			}
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+
+		return "NOT FOUND";
+	}
+
+	private void UpdateTable()
+	{
+		DefaultTableModel model = new DefaultTableModel(new String[]{"User", "Game", "Level", "Difficulty", "TimeTaken", "Suggestions", "Bugs"}, 0);
+		// Iterate through data
+		for (Vector<Object> row : filteredData)
+		{
+			String user = (String)row.get(0);
+			String gameName = (String)row.get(1);
+			String levelName = (String)row.get(2);
+			String difficulty = (String)row.get(3);
+			String timeTaken = (String)row.get(4);
+			String suggestions = (String)row.get(5);
+			String bugs = (String)row.get(6);
+
+			model.addRow(new Object[]{user, gameName, levelName, difficulty, timeTaken, suggestions, bugs});
+		}
+
+		tblReviews.setModel(model);
+	}
+
+	private void BasicFilter()
+	{
+		filteredData = new Vector<Vector<Object>>();
+		
+		String field = (String)cmbField.getSelectedItem(); 
+		String condition = (String)cmbCondition.getSelectedItem(); 
+		String value = txtValue.getText(); 
+
+		if (field.equals("No Filter")) 
+		{
+			filteredData = data; 
+			return; 
+		}
+
+		for (Vector<Object> row : data)
+		{
+			String user = (String)row.get(0);
+			String gameName = (String)row.get(1);
+			String levelName = (String)row.get(2);
+			String difficulty = (String)row.get(3);
+			String timeTaken = (String)row.get(4);
+
+			// Convert timeTaken to a rounded integer
+			int timeTakenInt = 0;
+			timeTakenInt = (int)Math.round(Double.parseDouble(timeTaken));
+			System.out.println("Time Taken: " + timeTakenInt);
+			
+			// Convert value to a rounded integer
+			int valueInt = 0;
+			if (field.equals("Time Taken") || field.equals("Difficulty"))
+			{
+				valueInt = (int)Math.round(Double.parseDouble(value));
+				System.out.println("Value: " + valueInt);
+			}
+
+			Boolean shouldAddRow = false; 
+
+			if (field.equals("User"))
+			{
+				if (condition.equals("Equals"))
+				{
+					if (user.equals(value))
+						shouldAddRow = true; 
+				}
+				else if (condition.equals("Not Equals"))
+				{
+					if (!user.equals(value))
+						shouldAddRow = true; 
+				}
+			}
+			else if (field.equals("Game"))
+			{
+				if (condition.equals("Equals"))
+				{
+					if (gameName.equals(value))
+						shouldAddRow = true; 
+				}
+				else if (condition.equals("Not Equals"))
+				{
+					if (!gameName.equals(value))
+						shouldAddRow = true; 
+				}
+			}
+			else if (field.equals("Level"))
+			{
+				if (condition.equals("Equals"))
+				{
+					if (levelName.equals(value))
+						shouldAddRow = true; 
+				}
+				else if (condition.equals("Not Equals"))
+				{
+					if (!levelName.equals(value))
+						shouldAddRow = true; 
+				}
+			}
+			else if (field.equals("Difficulty"))
+			{
+				if (condition.equals("Equals"))
+				{
+					if (difficulty.equals(value))
+						shouldAddRow = true; 
+				}
+				else if (condition.equals("Not Equals"))
+				{
+					if (!difficulty.equals(value))
+						shouldAddRow = true; 
+				}
+				else if (condition.equals("Greater Than"))
+				{
+					if (Integer.parseInt(difficulty) > Integer.parseInt(value))
+						shouldAddRow = true; 
+				}
+				else if (condition.equals("Less Than"))
+				{
+					if (Integer.parseInt(difficulty) < Integer.parseInt(value))
+						shouldAddRow = true; 
+				}
+			}
+			else if (field.equals("Time Taken"))
+			{
+				if (condition.equals("Equals"))
+				{
+					if (timeTaken.equals(value))
+						shouldAddRow = true; 
+				}
+				else if (condition.equals("Not Equals"))
+				{
+					if (!timeTaken.equals(value))
+						shouldAddRow = true; 
+				}
+				else if (condition.equals("Greater Than"))
+				{
+					// if (Integer.parseInt(timeTaken) > Integer.parseInt(value))
+					if (timeTakenInt > valueInt)
+						shouldAddRow = true; 
+				}
+				else if (condition.equals("Less Than"))
+				{
+					// if (Integer.parseInt(timeTaken) < Integer.parseInt(value))
+					if (timeTakenInt < valueInt)
+						shouldAddRow = true; 
+				}
+			}
+
+			if (shouldAddRow)
+				filteredData.add(row);
+		}
+	}
+
+	private void ToggleAdvanced()
+	{
+		if (basicFilter)
+		{
+			btnAdvanced.setText("Advanced");
+			SetBasicFilterEnabled(false);
+			txtAdvancedFilter.setVisible(true);
+			basicFilter = false;
+		}
+		else
+		{
+			btnAdvanced.setText("Basic");
+			SetBasicFilterEnabled(true);
+			txtAdvancedFilter.setVisible(false);
+			basicFilter = true;
+		}
+	}
+
+	private void SetBasicFilterEnabled (Boolean isEnabled)
+	{
+		cmbField.setVisible(isEnabled);
+		cmbCondition.setVisible(isEnabled);
+		txtValue.setVisible(isEnabled);
+		lblField.setVisible(isEnabled);
+		lblValue.setVisible(isEnabled);
+		lblCondition.setVisible(isEnabled);
+		// btnFilter.setVisible(isEnabled);
+	}
+
+	private void GenerateSQL () throws IOException
+	{
+		ProcessBuilder pb = new ProcessBuilder("/Library/Frameworks/Python.framework/Versions/3.10/bin/python3.10", "src/main/gpt/gpt.py", (String)txtAdvancedFilter.getText());
+	    Process process = pb.start();
+
+	    // Read the output of the Python script
+		BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+	    String sql = in.readLine(); 
+
+		// Read the error of the Python script
+		BufferedReader err = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+	    String lineErr = null;
+	    while ((lineErr = err.readLine()) != null) {
+	        System.out.println(lineErr);
+		}
+
+		System.out.println(sql);
+
+		AdvancedFilter(sql);
+		UpdateTable();
+	}
+
+	private void AdvancedFilter(String query)
+	{
+		
+		String sql = "SELECT LevelName, GameID, Username, Difficulty, TimeTaken, Suggestions, Bugs, ReviewID FROM Reviews JOIN Levels ON Reviews.LevelID = Levels.LevelID JOIN Users ON Reviews.UserID = Users.UserID WHERE " + query;
+		System.out.println(sql);
+		
+		Connection conn; 
+		
+		try
+		{
+			conn = DatabaseManager.getConnection(); 
+			
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+			
+			// DefaultTableModel model = new DefaultTableModel(new String[]{"User", "Game", "Level", "Difficulty", "TimeTaken", "Suggestions", "Bugs"}, 0);
+			filteredData = new Vector<Vector<Object>>();
+
+			while (rs.next())
+			{
+				Vector<Object> row = new Vector<Object>();
+
+				String user = rs.getString("Username");
+
+				String levelName = rs.getString("LevelName"); 
+				int gameId = rs.getInt("GameID");
+				String gameName = GetGame(gameId);
+
+				String difficulty = rs.getString("Difficulty");
+				String timeTaken = rs.getString("TimeTaken");
+				String suggestions = rs.getString("Suggestions");
+				String bugs = rs.getString("Bugs");
+
+				if (suggestions.equals(""))
+					suggestions = "-";
+
+				if (bugs.equals(""))
+					bugs = "-";
+
+				row.add(user); 
+				row.add(gameName);
+				row.add(levelName);
+				row.add(difficulty);
+				row.add(timeTaken);
+				row.add(suggestions);
+				row.add(bugs);
+				row.add(rs.getInt("ReviewID"));
+
+				// model.addRow(row);
+				filteredData.add(row);
+			}
+			
+			// tblReviews.setModel(model);
+
+			System.out.println("DONE");
+
+			UpdateTable();
+			
+			conn.close();
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	public void Reset ()
+	{
+		GetReviews(); 
+	}
+}

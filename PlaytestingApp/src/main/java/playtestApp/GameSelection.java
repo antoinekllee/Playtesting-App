@@ -1,6 +1,7 @@
 package playtestApp;
 
 import java.awt.EventQueue;
+import java.awt.Image;
 import java.awt.Point;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,9 +20,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JScrollPane;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.Font;
 
 public class GameSelection extends JFrame {
 
@@ -61,22 +64,22 @@ public class GameSelection extends JFrame {
 		contentPane.setLayout(null);
 		
 		JLabel lblTitle = new JLabel("Games");
-		lblTitle.setBounds(314, 10, 42, 16);
+		lblTitle.setBounds(384, 28, 42, 16);
 		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(lblTitle);
 		
 		JLabel lblUser = new JLabel("Username");
 		lblUser.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblUser.setBounds(549, 10, 98, 16);
+		lblUser.setBounds(506, 28, 131, 16);
 		contentPane.add(lblUser);
 		
 		String username = DataManager.GetUsername(); 
-		Boolean isAdmin = DataManager.GetAdminStatus(); 
+		Boolean isAdmin = DataManager.GetAdminStatus();
 		
-		lblUser.setText(username + (isAdmin ? " (Admin)" : ""));
+		lblUser.setText(username);
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(90, 54, 654, 373);
+		scrollPane.setBounds(77, 64, 667, 352);
 		contentPane.add(scrollPane);
 		
 
@@ -105,21 +108,33 @@ public class GameSelection extends JFrame {
 				OpenSettings(); 
 			}
 		});
-		btnSettings.setBounds(627, 5, 117, 29);
+		btnSettings.setBounds(649, 23, 95, 29);
 		contentPane.add(btnSettings);
 		
-		JButton btnNew = new JButton("Add Game");
+		JButton btnNew = new JButton("+");
+		btnNew.setFont(new Font("Lucida Grande", Font.PLAIN, 21));
 		btnNew.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				NewGame(); 
 			}
 		});
-		btnNew.setBounds(396, 5, 117, 29);
+		btnNew.setBounds(452, 23, 42, 29);
 		contentPane.add(btnNew);
 		
 		JButton btnAllReviews = new JButton("All Reviews");
-		btnAllReviews.setBounds(90, 10, 117, 29);
+		btnAllReviews.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// Create an instance of AllReviews page and pass in this GameSelection
+				AllReviews allReviews = new AllReviews(GameSelection.this);
+				allReviews.setVisible(true);
+				setVisible(false);
+			}
+		});
+		btnAllReviews.setBounds(77, 23, 117, 29);
 		contentPane.add(btnAllReviews);
+
+		setLocationRelativeTo(null);
+		ColourManager.globalStyling(this); 
 		
 		ShowGames(); 
 	}

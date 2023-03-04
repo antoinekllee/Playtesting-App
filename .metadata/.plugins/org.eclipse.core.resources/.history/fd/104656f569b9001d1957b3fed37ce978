@@ -1,0 +1,111 @@
+package playtestApp;
+
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import javax.swing.JComboBox;
+import javax.swing.JSpinner;
+import javax.swing.JTextField;
+import javax.swing.JTextArea;
+
+public class ReviewEditor extends JFrame {
+
+	private JPanel contentPane;
+	private JTextField txtTimeTaken;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					ReviewEditor frame = new ReviewEditor();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public ReviewEditor() 
+	{
+		setResizable(false);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 300, 500);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setAlwaysOnTop(true);
+
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		JLabel lblTitle = new JLabel("Edit Review");
+		lblTitle.setBounds(113, 16, 86, 16);
+		contentPane.add(lblTitle);
+		
+		JLabel lblUser = new JLabel("User");
+		lblUser.setBounds(33, 54, 86, 16);
+		contentPane.add(lblUser);
+		
+		JComboBox cmbUser = new JComboBox();
+		cmbUser.setBounds(141, 50, 119, 27);
+		contentPane.add(cmbUser);
+		
+		JComboBox cmbGame = new JComboBox();
+		cmbGame.setBounds(141, 82, 119, 27);
+		contentPane.add(cmbGame);
+		
+		JLabel lblGame = new JLabel("Game");
+		lblGame.setBounds(33, 86, 86, 16);
+		contentPane.add(lblGame);
+		
+		JComboBox cmbLevel = new JComboBox();
+		cmbLevel.setBounds(141, 115, 119, 27);
+		contentPane.add(cmbLevel);
+		
+		JLabel lblLevel = new JLabel("Level");
+		lblLevel.setBounds(33, 119, 86, 16);
+		contentPane.add(lblLevel);
+		
+		JLabel lblDifficulty = new JLabel("Difficulty");
+		lblDifficulty.setBounds(33, 159, 86, 16);
+		contentPane.add(lblDifficulty);
+		
+		JSpinner spnDifficulty = new JSpinner();
+		spnDifficulty.setBounds(141, 154, 109, 26);
+		contentPane.add(spnDifficulty);
+		
+		JLabel lblTimeTaken = new JLabel("Time Taken");
+		lblTimeTaken.setBounds(33, 192, 86, 16);
+		contentPane.add(lblTimeTaken);
+		
+		txtTimeTaken = new JTextField();
+		txtTimeTaken.setBounds(141, 187, 130, 26);
+		contentPane.add(txtTimeTaken);
+		txtTimeTaken.setColumns(10);
+		
+		JLabel lblSuggestions = new JLabel("Suggestions");
+		lblSuggestions.setBounds(33, 220, 86, 16);
+		contentPane.add(lblSuggestions);
+		
+		JTextArea txtSuggestions = new JTextArea();
+		txtSuggestions.setBounds(33, 248, 217, 61);
+		contentPane.add(txtSuggestions);
+		
+		JTextArea txtSuggestions_1 = new JTextArea();
+		txtSuggestions_1.setBounds(33, 355, 217, 61);
+		contentPane.add(txtSuggestions_1);
+		
+		JLabel lblBugs = new JLabel("Bugs");
+		lblBugs.setBounds(33, 321, 86, 16);
+		contentPane.add(lblBugs);
+	}
+}

@@ -50,7 +50,7 @@ public class LevelEditor extends JFrame {
 	public LevelEditor(Boolean isEdit) 
 	{
 		setResizable(false);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -63,15 +63,15 @@ public class LevelEditor extends JFrame {
 			levelInfo = DataManager.GetCurrLevel(); 
 		
 		JLabel lblTitle = new JLabel("Edit Level Info");
-		lblTitle.setBounds(180, 47, 149, 16);
+		lblTitle.setBounds(197, 75, 149, 16);
 		contentPane.add(lblTitle);
 		
 		JLabel lblName = new JLabel("Name");
-		lblName.setBounds(114, 121, 61, 16);
+		lblName.setBounds(124, 108, 61, 16);
 		contentPane.add(lblName);
 		
 		txtName = new JTextField();
-		txtName.setBounds(199, 116, 130, 26);
+		txtName.setBounds(197, 103, 130, 26);
 		contentPane.add(txtName);
 		txtName.setColumns(10);
 		// Set the text of txtName to the name of the level
@@ -83,7 +83,7 @@ public class LevelEditor extends JFrame {
 				DeleteLevel(); 
 			}
 		});
-		btnDelete.setBounds(103, 185, 117, 29);
+		btnDelete.setBounds(197, 183, 101, 29);
 		contentPane.add(btnDelete);
 		// Hide delete button if isEdit is false
 		btnDelete.setVisible(isEdit);
@@ -97,21 +97,20 @@ public class LevelEditor extends JFrame {
 					NewLevel();
 			}
 		});
-		btnSave.setBounds(231, 185, 117, 29);
+		btnSave.setBounds(197, 149, 101, 29);
 		contentPane.add(btnSave);
 		
-		JButton btnCancel = new JButton("Cancel");
+		JButton btnCancel = new JButton("x");
 		btnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				CloseWindow();
 			}
 		});
-		btnCancel.setBounds(39, 42, 117, 29);
+		btnCancel.setBounds(83, 45, 45, 29);
 		contentPane.add(btnCancel);
-		
-		JLabel lblGame = new JLabel("Game: Game Name");
-		lblGame.setBounds(114, 154, 215, 16);
-		contentPane.add(lblGame);
+
+		setLocationRelativeTo(null);
+		ColourManager.globalStyling(this); 
 	}
 
 	private void DeleteLevel()

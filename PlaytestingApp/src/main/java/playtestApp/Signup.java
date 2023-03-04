@@ -1,6 +1,7 @@
 package playtestApp;
 
 import java.awt.EventQueue;
+import java.awt.Image;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -8,6 +9,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.JTextField;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
@@ -15,12 +17,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.awt.event.ActionEvent;
+import javax.swing.JPasswordField;
 
 public class Signup extends JFrame {
 
     private JPanel contentPane;
     private JTextField txtUsername;
-    private JTextField txtPassword;
+    // private JTextField txtPassword;
+    private JPasswordField txtPassword;
 
     /**
      * Launch the application.
@@ -53,28 +57,32 @@ public class Signup extends JFrame {
 
         JLabel lblTitle = new JLabel("Signup");
         lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
-        lblTitle.setBounds(371, 134, 61, 16);
+        lblTitle.setBounds(366, 137, 61, 16);
         contentPane.add(lblTitle);
 
         txtUsername = new JTextField();
-        txtUsername.setBounds(336, 176, 130, 26);
+        txtUsername.setBounds(335, 181, 130, 26);
         contentPane.add(txtUsername);
         txtUsername.setColumns(10);
 
         JLabel lblUsername = new JLabel("Username");
         lblUsername.setHorizontalAlignment(SwingConstants.RIGHT);
-        lblUsername.setBounds(199, 181, 99, 16);
+        lblUsername.setBounds(212, 186, 99, 16);
         contentPane.add(lblUsername);
 
         JLabel lblPassword = new JLabel("Password");
         lblPassword.setHorizontalAlignment(SwingConstants.RIGHT);
-        lblPassword.setBounds(199, 219, 99, 16);
+        lblPassword.setBounds(212, 224, 99, 16);
         contentPane.add(lblPassword);
 
-        txtPassword = new JTextField();
+        txtPassword = new JPasswordField();
         txtPassword.setColumns(10);
-        txtPassword.setBounds(336, 214, 130, 26);
+        txtPassword.setBounds(335, 219, 130, 26);
         contentPane.add(txtPassword);
+
+        // passwordField = new JPasswordField();
+		// passwordField.setBounds(502, 219, 90, 26);
+		// contentPane.add(passwordField);
 
         // Create a JButton btnSignup the same as the login button and call the Signup method
         JButton btnSignup = new JButton("Sign Up");
@@ -84,7 +92,7 @@ public class Signup extends JFrame {
             }
         });
         // Set bounds and add to content pane
-        btnSignup.setBounds(349, 316, 117, 29);
+        btnSignup.setBounds(345, 269, 106, 29);
         contentPane.add(btnSignup);
         
         JButton btnMenu = new JButton("Menu");
@@ -93,8 +101,21 @@ public class Signup extends JFrame {
         		OpenMenu(); 
         	}
         });
-        btnMenu.setBounds(18, 34, 117, 29);
+        btnMenu.setBounds(49, 54, 106, 29);
         contentPane.add(btnMenu);
+
+        ImageIcon icon = new ImageIcon(Menu.class.getResource("/images/background.jpg")); 
+		Image image = icon.getImage(); 
+    	Image newImg = image.getScaledInstance(800, 500, Image.SCALE_SMOOTH); 
+    	icon = new ImageIcon(newImg); 
+		JLabel lblImage = new JLabel("");
+		lblImage.setBounds(0, 0, 800, 472);
+		lblImage.setHorizontalAlignment(SwingConstants.CENTER);
+		lblImage.setIcon(icon); 
+		contentPane.add(lblImage);
+
+        setLocationRelativeTo(null);
+		ColourManager.globalStyling(this); 
     }
     //	Write a signup method which will create a new user in the database
     private void AttemptSignup (String username, String password) {

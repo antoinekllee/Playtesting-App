@@ -1,0 +1,44 @@
+Write an SQL query to satisfy the user's following {request}. Reference the following {structure} of each table in the database to construct suitable SQL queries. All SQL queries must begin with "SELECT LevelName, GameID, Username, Difficulty, TimeTaken, Suggestions, Bugs FROM Reviews JOIN Levels ON Reviews.LevelID = Levels.LevelID JOIN Users ON Reviews.UserID = Users.UserID WHERE ".
+
+request = 
+<<REQUEST>>
+
+structure = 
+CREATE TABLE "Reviews" (
+	"ReviewID"	INTEGER NOT NULL DEFAULT 0 UNIQUE,
+	"LevelID"	INTEGER NOT NULL,
+	"UserID"	INTEGER NOT NULL,
+	"Difficulty"	INTEGER NOT NULL,
+	"TimeTaken"	INTEGER NOT NULL,
+	"Suggestions"	TEXT,
+	"Bugs"	TEXT,
+	PRIMARY KEY("ReviewID" AUTOINCREMENT),
+	FOREIGN KEY("LevelID") REFERENCES "Levels"("LevelID"),
+	FOREIGN KEY("UserID") REFERENCES "Users"("UserID")
+);
+
+CREATE TABLE "Games" (
+	"GameID"	INTEGER NOT NULL DEFAULT 0 UNIQUE,
+	"Name"	TEXT NOT NULL UNIQUE,
+	PRIMARY KEY("GameID" AUTOINCREMENT)
+);
+
+CREATE TABLE "Levels" (
+	"LevelID"	INTEGER NOT NULL DEFAULT 0 UNIQUE,
+	"GameID"	INTEGER NOT NULL,
+	"LevelName"	TEXT NOT NULL DEFAULT 'New Level',
+	"LevelIndex"	INTEGER NOT NULL DEFAULT 1,
+	PRIMARY KEY("LevelID" AUTOINCREMENT),
+	FOREIGN KEY("GameID") REFERENCES "Games"("GameID")
+);
+
+CREATE TABLE "Users" (
+	"UserID"	INTEGER NOT NULL DEFAULT 0 UNIQUE,
+	"Username"	TEXT NOT NULL UNIQUE,
+	"Password"	TEXT NOT NULL,
+	"IsAdmin"	INTEGER NOT NULL,
+	PRIMARY KEY("UserID" AUTOINCREMENT)
+);
+
+sql = 
+SELECT LevelName, GameID, Username, Difficulty, TimeTaken, Suggestions, Bugs FROM Reviews JOIN Levels ON Reviews.LevelID = Levels.LevelID JOIN Users ON Reviews.UserID = Users.UserID WHERE 

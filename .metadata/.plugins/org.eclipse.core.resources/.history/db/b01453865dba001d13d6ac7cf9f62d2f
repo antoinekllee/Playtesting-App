@@ -1,0 +1,356 @@
+package playtestApp;
+
+import java.awt.EventQueue;
+import java.awt.Point;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Vector;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+import javax.swing.JTable;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.JScrollPane;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
+public class LevelSelection extends JFrame {
+
+	private JPanel contentPane;
+	private JTable tblLevels;
+	
+	private Vector<Vector<Object>> data = new Vector<Vector<Object>>(); 
+	private JLabel lblTitle;
+	
+	private GameSelection parent = null; 
+	private JButton btnSettings;
+	private JButton btnNew;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					LevelSelection frame = new LevelSelection();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+	
+	public LevelSelection (GameSelection parent)
+	{
+		this(); 
+		this.parent = parent; 
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public LevelSelection() 
+	{
+		setResizable(false);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 800, 500);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		lblTitle = new JLabel(DataManager.gameInfo.name + " - Levels");
+		lblTitle.setBounds(330, 15, 147, 16);
+		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
+		contentPane.add(lblTitle);
+		
+		JLabel lblUser = new JLabel("Username");
+		lblUser.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblUser.setBounds(530, 26, 137, 16);
+		contentPane.add(lblUser);
+		
+		String username = DataManager.GetUsername(); 
+		Boolean isAdmin = DataManager.GetAdminStatus();
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(77, 64, 667, 352);
+		contentPane.add(scrollPane);
+		
+		DefaultTableModel tblModel = new DefaultTableModel () {
+			@Override
+		    public boolean isCellEditable(int row, int column) { return false; } // make uneditable
+		}; 
+
+		tblLevels = new JTable(tblModel);
+		tblLevels.addMouseListener(new MouseAdapter() {
+		    public void mousePressed(MouseEvent mouseEvent) {
+		        JTable table =(JTable) mouseEvent.getSource();
+		        Point point = mouseEvent.getPoint();
+		        int row = table.rowAtPoint(point);
+		        if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) 
+		        {
+					if (!DataManager.GetAdminStatus())
+		        		SelectLevel(row);
+					else
+						OpenLevelEditor(row, true);
+		        }
+		    }
+		});
+		
+		scrollPane.setViewportView(tblLevels);
+		
+		JButton btnGames = new JButton("<-");
+		btnGames.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) 
+			{
+				OpenGamesScreen(); 
+			}
+		});
+		btnGames.setBounds(76, 10, 55, 29);
+		contentPane.add(btnGames);
+		
+		btnSettings = new JButton("Settings");
+		btnSettings.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				OpenSettings(); 
+			}
+		});
+		btnSettings.setBounds(677, 39, 117, 29);
+		contentPane.add(btnSettings);
+		
+		btnNew = new JButton("New Level");
+		btnNew.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				OpenLevelEditor(-1, false);
+			}
+		});
+		btnNew.setBounds(222, 10, 117, 29);
+		contentPane.add(btnNew);
+		
+		JButton btnEdit = new JButton("Edit");
+		btnEdit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				OpenEditorWindow(); 
+			}
+		});
+		btnEdit.setBounds(483, 10, 75, 29);
+		contentPane.add(btnEdit);
+		// Hide the new level button if the user is not an admin
+		if (!DataManager.GetAdminStatus())
+			btnNew.setVisible(false);
+
+		setLocationRelativeTo(null);
+		ColourManager.globalStyling(this); 
+		
+		ShowLevels(); 
+	}
+
+	public void ShowLevels() 
+	{
+		lblTitle.setText(DataManager.gameInfo.name + " - Levels");
+
+		Connection conn; 
+		
+		try {
+			// connect to the db
+			conn = DatabaseManager.getConnection(); 
+			
+			// create statement using sql
+			String sql = "SELECT  * FROM Levels WHERE GameID = " + DataManager.gameInfo.id + " ORDER BY LevelIndex";
+			PreparedStatement statement = conn.prepareStatement(sql);
+			
+			// execute sql query and store result set
+			ResultSet rs = statement.executeQuery();
+			
+			DefaultTableModel tblModel = (DefaultTableModel) tblLevels.getModel(); 
+			
+			Vector<String> columnTitles = new Vector<String> ();
+			columnTitles.add("Name"); 
+			columnTitles.add(DataManager.GetAdminStatus() ? "Avg Difficulty Rating" : "Difficulty Rating"); 
+			columnTitles.add(DataManager.GetAdminStatus() ? "Avg Time Taken" : "Time Taken"); 
+		    
+			Vector<Vector<Object>> tableData = new Vector<Vector<Object>>();
+			Vector<Integer> indicies = new Vector<Integer>(); 
+			
+			while (rs.next())
+			{
+				Vector<Object> vector = new Vector<Object>();
+				vector.add(rs.getObject("LevelName"));
+
+				PreparedStatement statement2 = null;
+				ResultSet rs2 = null;
+
+				if (DataManager.GetAdminStatus()) // For admins
+				{
+					// Query the Reviews table in the SQL database to get the average Difficulty and TimeTaken for this level regardless of user
+					// If the review does not exist, return a "-" instead
+					// only calculate the average time taken for non zero values
+					sql = "SELECT AVG(Difficulty) AS Difficulty, AVG(CASE WHEN TimeTaken > 0 THEN TimeTaken ELSE NULL END) AS TimeTaken FROM Reviews WHERE LevelID = " + rs.getObject("LevelID");
+					statement2 = conn.prepareStatement(sql);
+					rs2 = statement2.executeQuery();
+
+					if (rs2.next())
+					{
+						String difficulty = rs2.getString("Difficulty"); 
+						// If difficulty is null, set it to "-"
+						if (difficulty == null)
+							difficulty = "-";
+						vector.add(difficulty);
+						String timeTaken = rs2.getString("TimeTaken"); 
+
+						System.out.println("timeTaken: " + timeTaken);
+
+						// If timeTaken is null, set it to 0
+						if (timeTaken == null)
+							timeTaken = "0";
+
+						// Convert timeTaken string into an int representing seconds
+						double secondsDouble = Double.parseDouble(timeTaken); // CAUSES ERROR FOR NEW ENTRIES
+						int secondsInt = (int) Math.round(secondsDouble);
+						
+						// Convert seconds into a string in the format "mm:ss"
+						int minutes = secondsInt / 60;
+						int seconds = secondsInt % 60;
+						String timeTakenString = String.format("%02d:%02d", minutes, seconds);
+
+						if (secondsInt == 0)
+							timeTakenString = "-";
+						
+						vector.add(timeTakenString);
+					}
+					else
+					{
+						vector.add("-");
+						vector.add("-");
+					}
+				}
+				else
+				{
+					// Query the Reviews table in the SQL database to get the Difficulty and TimeTaken for this level
+					// If the review does not exist, return a "-" instead
+					sql = "SELECT * FROM Reviews WHERE LevelID = " + rs.getObject("LevelID") + " AND UserID = " + DataManager.GetUserId();
+					statement2 = conn.prepareStatement(sql);
+					rs2 = statement2.executeQuery();
+
+					if (rs2.next())
+					{
+						vector.add(rs2.getObject("Difficulty"));
+						String timeTaken = rs2.getString("TimeTaken"); 
+
+						// Convert timeTaken string into an int representing seconds
+						double secondsDouble = Double.parseDouble(timeTaken);
+						int secondsInt = (int) Math.round(secondsDouble);
+						
+						// Convert seconds into a string in the format "mm:ss"
+						int minutes = secondsInt / 60;
+						int seconds = secondsInt % 60;
+						String formattedTimeTaken = String.format("%02d:%02d", minutes, seconds);
+
+						vector.add(formattedTimeTaken);
+					}
+					else
+					{
+						vector.add("-");
+						vector.add("-");
+					}
+				}
+				
+				tableData.add(vector);
+				
+				indicies.add((Integer) rs.getObject("LevelID")); 
+			}
+			
+			tblModel.setDataVector(tableData, columnTitles);
+			
+			tblLevels.setModel(tblModel);
+			
+			for (int i = 0; i < tableData.size(); i++)
+			{
+				Vector<Object> row = new Vector<Object>(); 
+				row.add(indicies.get(i)); 
+				for (int j = 0; j < tableData.get(i).size(); j++)
+					row.add(tableData.get(i).get(j)); 
+				
+				data.add(row); 
+			}
+		} catch (SQLException e) 
+		{ 
+			e.printStackTrace(); 
+		} 
+	}
+
+	private void SelectLevel(int rowIndex)
+	{
+		DataManager.levelIndex = rowIndex; 
+		DataManager.ResetLevelInfos(); 
+		
+		for (Vector<Object> vector : data) 
+		{
+			DataManager.EntryInfo newLevelInfo = new DataManager.EntryInfo((Integer)vector.get(0), (String)vector.get(1)); 
+			DataManager.levelInfos.add(newLevelInfo); 
+		}
+		
+		PlaytestScreen playtestScreen = new PlaytestScreen(this); 
+        playtestScreen.setVisible(true);
+        setVisible(false);   
+	}
+
+	private void OpenLevelEditor(int rowIndex, Boolean isEdit)
+	{
+		if (isEdit)
+		{
+			DataManager.levelIndex = rowIndex; 
+			DataManager.ResetLevelInfos(); 
+			
+			for (Vector<Object> vector : data) 
+			{
+				DataManager.EntryInfo newLevelInfo = new DataManager.EntryInfo((Integer)vector.get(0), (String)vector.get(1)); 
+				DataManager.levelInfos.add(newLevelInfo); 
+			}
+		}
+		
+		LevelEditor levelEditor = new LevelEditor(this, isEdit); 
+		levelEditor.setVisible(true);
+		// setVisible(false);   
+	}
+
+	private void OpenEditorWindow() 
+	{
+		GameEditor gameEditor = new GameEditor(this, true);
+		gameEditor.setVisible(true);
+	}
+	
+	public void OpenGamesScreen () 
+	{
+		DataManager.gameInfo.Reset(); 
+		parent.setVisible(true);
+		this.setVisible(false);
+	}
+
+	// Override the SetVisible method to update the table when the screen is opened
+	@Override
+	public void setVisible(boolean isVisible) 
+	{
+		super.setVisible(isVisible);
+		if (isVisible)
+			ShowLevels();
+	}
+
+	private void OpenSettings()
+	{
+		DataManager.OpenSettings(this);
+	}
+}
+
+// opposite effect of their intentions

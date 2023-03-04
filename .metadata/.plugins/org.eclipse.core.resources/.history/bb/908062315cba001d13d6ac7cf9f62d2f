@@ -1,0 +1,351 @@
+package playtestApp;
+
+import java.awt.EventQueue;
+import java.awt.Image;
+import java.awt.Point;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Vector;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+import javax.swing.JTable;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import javax.swing.JScrollPane;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
+public class GameSelection extends JFrame {
+
+	private JPanel contentPane;
+	private JTable tblGames;
+	
+	private Vector<Vector<Object>> data = new Vector<Vector<Object>>(); 
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					GameSelection frame = new GameSelection();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public GameSelection() 
+	{
+		setResizable(false);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 800, 500);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		JLabel lblTitle = new JLabel("Games");
+		lblTitle.setBounds(314, 10, 42, 16);
+		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
+		contentPane.add(lblTitle);
+		
+		JLabel lblUser = new JLabel("Username");
+		lblUser.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblUser.setBounds(549, 10, 98, 16);
+		contentPane.add(lblUser);
+		
+		String username = DataManager.GetUsername(); 
+		Boolean isAdmin = DataManager.GetAdminStatus(); 
+		
+		lblUser.setText(username + (isAdmin ? " (Admin)" : ""));
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(0, 38, 800, 434);
+		contentPane.add(scrollPane);
+		
+
+
+		DefaultTableModel tblModel = new DefaultTableModel () {
+			@Override
+		    public boolean isCellEditable(int row, int column) { return false; } // make uneditable
+		}; 
+
+		tblGames = new JTable(tblModel);
+		tblGames.addMouseListener(new MouseAdapter() {
+		    public void mousePressed(MouseEvent mouseEvent) {
+		        JTable table =(JTable) mouseEvent.getSource();
+		        Point point = mouseEvent.getPoint();
+		        int row = table.rowAtPoint(point);
+		        if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) 
+		            SelectGame(row);
+		    }
+		});
+		
+		scrollPane.setViewportView(tblGames);
+		
+		JButton btnSettings = new JButton("Settings");
+		btnSettings.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				OpenSettings(); 
+			}
+		});
+		btnSettings.setBounds(627, 5, 117, 29);
+		contentPane.add(btnSettings);
+		
+		JButton btnNew = new JButton("+");
+		btnNew.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				NewGame(); 
+			}
+		});
+		btnNew.setBounds(396, 5, 117, 29);
+		contentPane.add(btnNew);
+		
+		JButton btnAllReviews = new JButton("All Reviews");
+		btnAllReviews.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// Create an instance of AllReviews page and pass in this GameSelection
+				AllReviews allReviews = new AllReviews(GameSelection.this);
+				allReviews.setVisible(true);
+				setVisible(false);
+			}
+		});
+		btnAllReviews.setBounds(90, 10, 117, 29);
+		contentPane.add(btnAllReviews);
+
+		setLocationRelativeTo(null);
+		ColourManager.globalStyling(this); 
+		
+		ShowGames(); 
+	}
+
+	public void ShowGames() 
+	{
+		Connection conn; 
+		
+		try {
+			// connect to the db
+			conn = DatabaseManager.getConnection(); 
+			
+			// create statement using sql
+			String sql = "SELECT  * FROM Games";
+			PreparedStatement statement = conn.prepareStatement(sql);
+			
+			// execute sql query and store result set
+			ResultSet rs = statement.executeQuery();
+			
+			DefaultTableModel tblModel = (DefaultTableModel) tblGames.getModel(); 
+			
+			Vector<String> columnTitles = new Vector<String> ();
+			columnTitles.add("Name"); 
+			if(!DataManager.GetAdminStatus())
+			{
+				columnTitles.add("Levels Reviewed"); 
+				columnTitles.add("Total Playtime"); 
+			}
+			else
+			{
+				columnTitles.add("Levels"); 
+				columnTitles.add("Reviews");
+			}
+		    
+			Vector<Vector<Object>> tableData = new Vector<Vector<Object>>();
+			Vector<Integer> indicies = new Vector<Integer>(); 
+			
+			while (rs.next())
+			{
+				Vector<Object> vector = new Vector<Object>();
+				vector.add(rs.getObject("Name"));
+
+				// GAME ID IS rs.getInt("GameID")
+				int gameId = rs.getInt("GameID");
+				Vector<Integer> levelIds = GetLevels(gameId); 
+
+				if (!DataManager.GetAdminStatus())
+				{
+					// get number of levels reviewed
+					vector.add(GetReviewedCount(conn, levelIds, true) + "/" + levelIds.size()); 
+					// get total playtime
+					vector.add(GetTotalPlaytime(conn, levelIds));
+				}
+				else
+				{
+					vector.add(levelIds.size());
+					// Query Levels table and count number of levels where LevelID in levelIds for any user
+					vector.add(GetReviewedCount(conn, levelIds, false));
+				}
+
+				tableData.add(vector);
+				
+				indicies.add((Integer) rs.getObject("GameID")); 
+			}
+			
+			tblModel.setDataVector(tableData, columnTitles);
+			
+			tblGames.setModel(tblModel);
+
+			data = new Vector<Vector<Object>>(); 
+			
+			for (int i = 0; i < tableData.size(); i++)
+			{
+				Vector<Object> row = new Vector<Object>(); 
+				row.add(indicies.get(i)); 
+				for (int j = 0; j < tableData.get(i).size(); j++)
+					row.add(tableData.get(i).get(j)); 
+				
+				data.add(row); 
+			}
+			
+			statement.close(); 
+			conn.close(); 
+		} catch (SQLException e) 
+		{ 
+			e.printStackTrace(); 
+		} 
+	}
+
+	private String GetReviewedCount(Connection conn, Vector<Integer> levelIds, Boolean oneUser) throws SQLException 
+	{
+		String sql;
+		// Query the Reviews table and count the number of reviews where the LevelID is in the levelIds vector, and UserID is the currently logged in user
+		sql = "SELECT COUNT(*) FROM Reviews WHERE " + (oneUser ? "UserID = ? AND " : "") + "LevelID IN ("; 
+		for (int i = 0; i < levelIds.size(); i++)
+		{
+			sql += levelIds.get(i); 
+			if (i < levelIds.size() - 1)
+				sql += ", "; 
+		}
+		sql += ")"; 
+		
+		PreparedStatement statement = conn.prepareStatement(sql); 
+		if (oneUser)
+			statement.setInt(1, DataManager.GetUserId()); 
+		ResultSet rs2 = statement.executeQuery(); 
+		
+		int numReviewed = 0; 
+		
+		while (rs2.next())
+			numReviewed = rs2.getInt(1); 
+		
+		return numReviewed + ""; 
+	}
+
+	private String GetTotalPlaytime(Connection conn, Vector<Integer> levelIds) throws SQLException 
+	{
+		String sql;
+		// Query the Reviews table and sum the playtime where the LevelID is in the levelIds vector, and UserID is the currently logged in user
+		sql = "SELECT SUM(TimeTaken) FROM Reviews WHERE UserID = ? AND LevelID IN ("; 
+		for (int i = 0; i < levelIds.size(); i++)
+		{
+			sql += levelIds.get(i); 
+			if (i < levelIds.size() - 1)
+				sql += ", "; 
+		}
+		sql += ")"; 
+		
+		PreparedStatement statement = conn.prepareStatement(sql); 
+		statement.setInt(1, DataManager.GetUserId()); 
+		ResultSet rs2 = statement.executeQuery(); 
+		
+		int totalPlaytime = 0; 
+		
+		while (rs2.next())
+			totalPlaytime = rs2.getInt(1); 
+
+		// Convert the totalPlaytime (in seconds) to a 00:00:00 format, with hours, minutes and seconds
+		int hours = totalPlaytime / 3600;
+		int minutes = (totalPlaytime % 3600) / 60;
+		int seconds = totalPlaytime % 60;
+
+		String time = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+		return time;
+	}
+
+	private Vector<Integer> GetLevels(int GameID)
+	{
+		// Get an array of level ids for the game by querying the Levels table
+		Connection conn;
+
+		try {
+			// connect to the db
+			conn = DatabaseManager.getConnection();
+
+			// create statement using sql
+			String sql = "SELECT LevelID FROM Levels WHERE GameID = ?";
+			PreparedStatement statement = conn.prepareStatement(sql);
+			statement.setInt(1, GameID);
+
+			// execute sql query and store result set
+			ResultSet rs = statement.executeQuery();
+
+			Vector<Integer> levelIDs = new Vector<Integer>();
+
+			while (rs.next())
+			{
+				levelIDs.add(rs.getInt("LevelID"));
+			}
+
+			statement.close();
+			
+			return levelIDs;
+		} catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	
+	private void SelectGame(int rowIndex)
+	{
+		int gameId = (Integer) data.get(rowIndex).get(0); 
+		String gameName = (String) data.get(rowIndex).get(1); 
+		
+		DataManager.gameInfo = new DataManager.EntryInfo(gameId, gameName); 
+		
+		System.out.println("OPEN LEVEL SELECTION PAGE");
+		System.out.println(this);
+		LevelSelection levelSelection = new LevelSelection(this); 
+        levelSelection.setVisible(true);
+        setVisible(false);   
+	}
+
+	// Override the SetVisible method to update the table when the window is shown
+	@Override
+	public void setVisible(boolean isVisible)
+	{
+		super.setVisible(isVisible);
+		
+		if (isVisible)
+			ShowGames();
+	}
+
+	private void OpenSettings()
+	{
+		DataManager.OpenSettings(this); 
+	}
+
+	private void NewGame()
+	{
+		GameEditor gameEditor = new GameEditor(this, false);
+		gameEditor.setVisible(true);
+	}
+}

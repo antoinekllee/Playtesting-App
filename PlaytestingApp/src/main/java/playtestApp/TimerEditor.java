@@ -10,6 +10,8 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.SwingConstants;
+import java.awt.Font;
 
 public class TimerEditor extends JFrame {
 
@@ -58,7 +60,7 @@ public class TimerEditor extends JFrame {
 	 */
 	public TimerEditor() {
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
+		setBounds(100, 100, 450, 250);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setResizable(false);
@@ -68,7 +70,8 @@ public class TimerEditor extends JFrame {
 		contentPane.setLayout(null);
 		
 		txtTimer = new JTextField();
-		txtTimer.setBounds(40, 74, 258, 93);
+		txtTimer.setFont(new Font("Lucida Grande", Font.PLAIN, 21));
+		txtTimer.setBounds(51, 90, 228, 70);
 		contentPane.add(txtTimer);
 		txtTimer.setColumns(10);
 		
@@ -78,11 +81,12 @@ public class TimerEditor extends JFrame {
 				ResetTimer();
 			}
 		});
-		btnReset.setBounds(310, 117, 117, 29);
+		btnReset.setBounds(291, 90, 99, 29);
 		contentPane.add(btnReset);
 		
 		JLabel lblTitle = new JLabel("Edit Timer");
-		lblTitle.setBounds(176, 32, 117, 16);
+		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
+		lblTitle.setBounds(174, 44, 117, 16);
 		contentPane.add(lblTitle);
 		
 		JButton btnSave = new JButton("Save");
@@ -91,8 +95,11 @@ public class TimerEditor extends JFrame {
 				SaveTimer(); 
 			}
 		});
-		btnSave.setBounds(251, 197, 117, 29);
+		btnSave.setBounds(291, 131, 99, 29);
 		contentPane.add(btnSave);
+
+		setLocationRelativeTo(null);
+		ColourManager.globalStyling(this); 
 	}
 
 	private void ResetTimer()
