@@ -76,7 +76,7 @@ public class Settings extends JFrame {
 		String username = DataManager.GetUsername(); 
 		Boolean isAdmin = DataManager.GetAdminStatus();
 		
-		lblUser.setText("User: " + username);
+		lblUser.setText("User: " + username + (isAdmin ? " (Admin)" : ""));
 
 		setLocationRelativeTo(null);
 		ColourManager.globalStyling(this); 

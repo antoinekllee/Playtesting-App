@@ -122,7 +122,7 @@ public class PlaytestScreen extends JFrame {
 		lblTimer = new JLabel("00:00:00");
 		lblTimer.setFont(new Font("Lucida Grande", Font.PLAIN, 22));
 		lblTimer.setHorizontalAlignment(SwingConstants.CENTER);
-		lblTimer.setBounds(185, 108, 161, 51);
+		lblTimer.setBounds(188, 102, 161, 51);
 		contentPane.add(lblTimer);
 		
 		btnTimerPlayPause = new JButton("PLAY");
@@ -132,7 +132,7 @@ public class PlaytestScreen extends JFrame {
 				ToggleTimer();
 			}
 		});
-		btnTimerPlayPause.setBounds(330, 124, 88, 29);
+		btnTimerPlayPause.setBounds(345, 118, 88, 29);
 		contentPane.add(btnTimerPlayPause);
 		
 		JButton btnTimerEdit = new JButton("EDIT");
@@ -148,7 +148,7 @@ public class PlaytestScreen extends JFrame {
 				setEnabled(false);
 			}
 		});
-		btnTimerEdit.setBounds(426, 124, 88, 29);
+		btnTimerEdit.setBounds(434, 118, 88, 29);
 		contentPane.add(btnTimerEdit);
 		
 		sliderDifficulty = new JSlider();
@@ -183,11 +183,11 @@ public class PlaytestScreen extends JFrame {
 		
 		JLabel lblDifficulty = new JLabel("Difficulty Rating");
 		lblDifficulty.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblDifficulty.setBounds(185, 190, 133, 16);
+		lblDifficulty.setBounds(188, 190, 133, 16);
 		contentPane.add(lblDifficulty);
 		
 		lblDifficultyValue = new JLabel("10");
-		lblDifficultyValue.setBounds(568, 190, 61, 16);
+		lblDifficultyValue.setBounds(553, 190, 61, 16);
 		contentPane.add(lblDifficultyValue);
 		
 		txtSuggestions = new JTextArea();
@@ -216,7 +216,7 @@ public class PlaytestScreen extends JFrame {
 				SetTimer(0);
 			}
 		});
-		btnReset.setBounds(526, 124, 88, 29);
+		btnReset.setBounds(524, 118, 88, 29);
 		contentPane.add(btnReset);
 		
 		JButton btnSave = new JButton("Save");

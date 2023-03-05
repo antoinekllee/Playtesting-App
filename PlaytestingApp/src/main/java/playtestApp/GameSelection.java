@@ -1,7 +1,6 @@
 package playtestApp;
 
 import java.awt.EventQueue;
-import java.awt.Image;
 import java.awt.Point;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,7 +19,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JScrollPane;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -76,7 +74,7 @@ public class GameSelection extends JFrame {
 		String username = DataManager.GetUsername(); 
 		Boolean isAdmin = DataManager.GetAdminStatus();
 		
-		lblUser.setText(username);
+		lblUser.setText(username + (isAdmin ? " (Admin)" : ""));
 		
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBounds(77, 64, 667, 352);
@@ -132,6 +130,12 @@ public class GameSelection extends JFrame {
 		});
 		btnAllReviews.setBounds(77, 23, 117, 29);
 		contentPane.add(btnAllReviews);
+
+		// If the user is not an admin, hide the All Reviews button
+		if (!isAdmin) {
+			btnAllReviews.setVisible(false);
+			btnNew.setVisible(false);
+		}
 
 		setLocationRelativeTo(null);
 		ColourManager.globalStyling(this); 

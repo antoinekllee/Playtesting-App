@@ -68,8 +68,8 @@ public class ReviewEditor extends JFrame {
 		// Set the value of the difficulty spinner to the difficulty of the review. Diffulculty is stored as a string so it must be converted to an int
 		spnDifficulty.setValue(Integer.parseInt((String)reviewInfo.get(3)));
 
-		// Set the value of the time taken text field to the time taken of the review
-		txtTimeTaken.setText((String)reviewInfo.get(4));
+		// Set the value of the time taken text field to the time taken of the review, rounded to 2 decimal places
+		txtTimeTaken.setText(String.format("%.2f", Double.parseDouble((String)reviewInfo.get(4))));
 
 		// Set the value of the suggestions text area to the suggestions of the review
 		txtSuggestions.setText((String)reviewInfo.get(5));

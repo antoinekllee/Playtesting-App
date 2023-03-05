@@ -150,10 +150,7 @@ public class LevelSelection extends JFrame {
 		contentPane.add(btnEdit);
 		// Hide the new level button if the user is not an admin
 		if (!DataManager.GetAdminStatus())
-		{
 			btnNew.setVisible(false);
-			btnEdit.setVisible(false);
-		}
 
 		setLocationRelativeTo(null);
 		ColourManager.globalStyling(this); 
@@ -163,8 +160,6 @@ public class LevelSelection extends JFrame {
 
 	public void ShowLevels() 
 	{
-		tblLevels.clearSelection(); 
-
 		lblTitle.setText(DataManager.gameInfo.name + " - Levels");
 
 		Connection conn; 
@@ -282,8 +277,6 @@ public class LevelSelection extends JFrame {
 			
 			tblLevels.setModel(tblModel);
 			
-			data = new Vector<Vector<Object>>(); 
-			
 			for (int i = 0; i < tableData.size(); i++)
 			{
 				Vector<Object> row = new Vector<Object>(); 
@@ -301,8 +294,6 @@ public class LevelSelection extends JFrame {
 
 	private void SelectLevel(int rowIndex)
 	{
-		// System.out.println(rowIndex);
-
 		DataManager.levelIndex = rowIndex; 
 		DataManager.ResetLevelInfos(); 
 		
@@ -311,11 +302,7 @@ public class LevelSelection extends JFrame {
 			DataManager.EntryInfo newLevelInfo = new DataManager.EntryInfo((Integer)vector.get(0), (String)vector.get(1)); 
 			DataManager.levelInfos.add(newLevelInfo); 
 		}
-
-		System.out.println("Level Index: ");
-		System.out.println(DataManager.GetCurrLevel().id);
-		System.out.println(DataManager.GetCurrLevel().name);
-
+		
 		PlaytestScreen playtestScreen = new PlaytestScreen(this); 
         playtestScreen.setVisible(true);
         setVisible(false);   
